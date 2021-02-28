@@ -49,7 +49,7 @@ function parseLogLocation(line, offset) {
         var worldName = escape(line.substr(offset + 15));
         this.worldName = worldName;
         var date = parseLogDate(line);
-        var parsed = ['location-worldname', date, worldName];
+        var parsed = [date, 'location-worldname', worldName];
         console.log(parsed);
         return parsed;
     }
@@ -58,7 +58,7 @@ function parseLogLocation(line, offset) {
         var worldName = 'worldName' in this ? this.worldName : null;
         var location = escape(line.substr(offset + 8));
         var date = parseLogDate(line);
-        var parsed = ['location', date, location, worldName];
+        var parsed = [date, 'location', location, worldName];
         console.log(parsed);
         return parsed;
     }
@@ -93,7 +93,7 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
     if (line.substr(offset, 15) === 'OnPlayerJoined ') {
         var userDisplayName = escape(line.substr(offset + 15));
         var date = parseLogDate(line);
-        var parsed = ['player-joined', date, userDisplayName];
+        var parsed = [date, 'player-joined', userDisplayName];
         console.log(parsed);
         return parsed;
     }
@@ -101,7 +101,7 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
     if (line.substr(offset, 13) === 'OnPlayerLeft ') {
         var userDisplayName = escape(line.substr(offset + 13));
         var date = parseLogDate(line);
-        var parsed = ['player-left', date, userDisplayName];
+        var parsed = [date, 'player-left', userDisplayName];
         console.log(parsed);
         return parsed;
     }
@@ -119,7 +119,7 @@ function parseLogNotification(line, offset) {
         }
         var data = escape(line.substr(offset + 24, pos - (offset + 24)));
         var date = parseLogDate(line);
-        var parsed = ['notification', date, data];
+        var parsed = [date, 'notification', data];
         console.log(parsed);
         return parsed;
     }
