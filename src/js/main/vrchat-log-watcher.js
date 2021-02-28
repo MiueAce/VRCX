@@ -7,7 +7,7 @@ const { Tail } = require('tail');
 /** @type {?VRChatLogWatcher} */
 var vrchatLogWatcher = null;
 
-function getBaseName(filePath) {
+function getLogBaseName(filePath) {
     var basename = path.basename(filePath);
 
     if (/^output_log_.+\.txt$/i.test(basename) === false) {
@@ -222,7 +222,7 @@ class VRChatLogWatcher extends EventEmitter {
     }
 
     watchLog(filePath) {
-        var name = getBaseName(filePath);
+        var name = getLogBaseName(filePath);
         if (name === null) {
             return;
         }
@@ -247,7 +247,7 @@ class VRChatLogWatcher extends EventEmitter {
     }
 
     unwatchLog(filePath) {
-        var name = getBaseName(filePath);
+        var name = getLogBaseName(filePath);
         if (name === null) {
             return;
         }
