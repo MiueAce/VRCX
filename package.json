@@ -82,5 +82,8 @@
     "win": {
       "target": "zip"
     }
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.3.2"
   }
 }
