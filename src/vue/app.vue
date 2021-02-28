@@ -25,7 +25,7 @@ export default {
         const currentUser = ref(null);
 
         onMounted(function () {
-            vrchatLogRepository.start();
+            vrchatLogRepository.reset();
         });
 
         return {

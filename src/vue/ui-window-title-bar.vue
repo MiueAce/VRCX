@@ -8,14 +8,17 @@
         el-radio-group(size="mini" v-model="$i18n.locale")
             el-radio-button(v-for="locale in $i18n.availableLocales" :key="locale" :label="locale")
                 | {{ $t(`locale.${locale}`) }}
+    #app-debug(style="position:absolute;left:0;top:30px;color:#888") logCount={{ logCount }}
 </template>
 
 <script>
 const { ipcRenderer } = window;
+const { logCount } = require('../js/renderer/vrchat-log-repository.js');
 
 export default {
     setup() {
         return {
+            logCount,
             close() {
                 ipcRenderer.send('main-window', 'close');
             },

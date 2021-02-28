@@ -183,7 +183,8 @@ class VRChatLogWatcher extends EventEmitter {
     constructor() {
         super();
 
-        this.isBusy = false;
+        /** @type {?Promise} */
+        this.pendingStop = null;
 
         /** @type {?chokidar.FSWatcher} */
         this.watcher = null;
@@ -192,7 +193,7 @@ class VRChatLogWatcher extends EventEmitter {
     }
 
     start() {
-        if (this.isBusy === true || this.watcher !== null) {
+        if (this.pendingStop !== null || this.watcher !== null) {
             return;
         }
 
@@ -227,35 +228,46 @@ class VRChatLogWatcher extends EventEmitter {
         });
 
         this.watcher = watcher;
+        this.emit('start');
     }
 
     stop() {
+        if (this.pendingStop !== null) {
+            return this.pendingStop;
+        }
+
+        if (this.watcher === null) {
+            return Promise.resolve();
+        }
+
         var self = this;
 
-        return new Promise(async function (resolve, reject) {
-            if (self.isBusy === true || self.watcher === null) {
-                resolve();
-                return;
-            }
-
-            self.isBusy = true;
+        return new Promise(async function (resolve) {
+            self.pendingStop = this;
 
             try {
                 await self.watcher.close();
-
-                setImmediate(function () {
-                    for (var filePath of self.tailMap.keys()) {
-                        self.unwatchLog(filePath);
-                    }
-                    self.watcher = null;
-                    self.isBusy = false;
-                    resolve();
-                });
             } catch (err) {
                 console.error(err);
-                reject(err);
             }
+
+            self.watcher = null;
+
+            setImmediate(function () {
+                for (var filePath of self.tailMap.keys()) {
+                    self.unwatchLog(filePath);
+                }
+                resolve();
+                self.pendingStop = null;
+                self.emit('stop');
+            });
         });
+    }
+
+    async reset() {
+        await vrchatLogWatcher.stop();
+        this.emit('reset');
+        vrchatLogWatcher.start();
     }
 
     watchLog(filePath) {
@@ -319,10 +331,7 @@ ipcMain.on('vrchat-log-watcher', function (event, command) {
             break;
 
         case 'reset':
-            (async function () {
-                await vrchatLogWatcher.stop();
-                vrchatLogWatcher.start();
-            });
+            vrchatLogWatcher.reset();
             break;
 
         default:

@@ -1,4 +1,5 @@
 const { ipcRenderer } = window;
+const { ref } = require('vue');
 
 /** @type {?VRChatLogRepository} */
 var vrchatLogRepository = null;
@@ -6,14 +7,15 @@ var vrchatLogRepository = null;
 class VRChatLogRepository {
     constructor() {
         this.contextMap = new Map();
+        this.logCount = ref(0);
     }
 
-    start() {
-        ipcRenderer.send('vrchat-log-watcher', 'start');
+    reset() {
+        ipcRenderer.send('vrchat-log-watcher', 'reset');
     }
 
-    stop() {
-        ipcRenderer.send('vrchat-log-watcher', 'stop');
+    onReset() {
+        this.logCount.value = 0;
     }
 
     onWatch(file) {
@@ -98,10 +100,16 @@ class VRChatLogRepository {
                 // event('player-left', user, world, location)
                 break;
         }
+
+        this.logCount.value += 1;
     }
 }
 
 vrchatLogRepository = new VRChatLogRepository();
+
+ipcRenderer.on('vrchat-log-watcher:reset', function (event) {
+    vrchatLogRepository.onReset();
+});
 
 ipcRenderer.on('vrchat-log-watcher:watch', function (event, file) {
     vrchatLogRepository.onWatch(file);

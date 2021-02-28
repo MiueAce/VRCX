@@ -56,6 +56,10 @@ const vrchatLogWatcher = require('./vrchat-log-watcher.js');
         }, 5000);
     });
 
+    vrchatLogWatcher.on('reset', function () {
+        mainWindow.send('vrchat-log-watcher:reset');
+    });
+
     vrchatLogWatcher.on('watch', function (file) {
         mainWindow.send('vrchat-log-watcher:watch', file);
     });
