@@ -172,16 +172,16 @@ class VRChatLogWatcher extends EventEmitter {
     constructor() {
         super();
 
+        this.isBusy = false;
+
         /** @type {?chokidar.FSWatcher} */
         this.watcher = null;
 
         this.tailMap = new Map();
-
-        this.logs = [];
     }
 
     start() {
-        if (this.watcher !== null) {
+        if (this.isBusy === true || this.watcher !== null) {
             return;
         }
 
@@ -205,11 +205,15 @@ class VRChatLogWatcher extends EventEmitter {
             .on('ready', () => console.log('Initial scan complete. Ready for changes'));
 
         watcher.on('add', function (filePath) {
-            vrchatLogWatcher.watchLog(filePath);
+            setImmediate(function () {
+                vrchatLogWatcher.watchLog(filePath);
+            });
         });
 
         watcher.on('change', function (filePath) {
-            vrchatLogWatcher.watchLog(filePath);
+            setImmediate(function () {
+                vrchatLogWatcher.watchLog(filePath);
+            });
         });
 
         watcher.on('unlink', function (filePath) {
@@ -219,23 +223,27 @@ class VRChatLogWatcher extends EventEmitter {
         this.watcher = watcher;
     }
 
-    stop() {
-        var { watcher } = this;
-
-        if (watcher === null) {
+    async stop() {
+        if (this.isBusy === true || this.watcher === null) {
             return;
         }
 
-        this.logs.length = 0;
+        this.isBusy = true;
 
-        for (var tail of this.tailMap.values()) {
-            tail.unwatch();
+        try {
+            await this.watcher.close();
+
+            setImmediate(() => {
+                for (var tail of this.tailMap.values()) {
+                    tail.unwatch();
+                }
+                this.tailMap.clear();
+                this.watcher = null;
+                this.isBusy = false;
+            });
+        } catch (err) {
+            console.error(err);
         }
-
-        this.tailMap.clear();
-
-        this.watcher = null;
-        watcher.close();
     }
 
     watchLog(filePath) {
