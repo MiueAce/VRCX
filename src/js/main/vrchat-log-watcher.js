@@ -232,7 +232,7 @@ class VRChatLogWatcher extends EventEmitter {
     stop() {
         var self = this;
 
-        return new Promise(function(resolve, reject) {
+        return new Promise(async function (resolve, reject) {
             if (self.isBusy === true || self.watcher === null) {
                 resolve();
                 return;
