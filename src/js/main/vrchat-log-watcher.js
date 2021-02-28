@@ -44,18 +44,38 @@ function parseLogLocation(line, offset) {
     // 2021.02.28 21:54:16 Log        -  [Behaviour] Entering Room: VRChat Home
     // 2021.02.28 21:54:16 Log        -  [Behaviour] Joining wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd:9686~private(usr_4f76a584-9d4b-46f6-8209-8305eb683661)~nonce(C19B3A1933A318261DFFA497750CB160757EFA8F1B6C4FE3E77D16C1E3A9A80C)
     // 2021.02.28 21:54:16 Log        -  [Behaviour] Joining or Creating Room: VRChat Home
+    // 2021.02.28 23:55:01 Log        -  [Behaviour] OnLeftRoom
 
-    if (line[offset] === 'E' && line.substr(offset, 15) === 'Entering Room: ') {
-        var worldName = escape(line.substr(offset + 15));
-        this.worldName = worldName;
+    var c = line[offset];
+
+    if (c === 'D' && line.substr(offset, 17) === 'Destination set: ') {
+        var location = escape(line.substr(offset + 17));
+        var date = parseLogDate(line);
+        var parsed = [date, 'destination-set', location];
+        vrchatLogWatcher.emit('data', parsed);
         return parsed;
     }
 
-    if (line[offset] === 'J' && line.substr(offset, 13) === 'Joining wrld_') {
+    if (c === 'E' && line.substr(offset, 15) === 'Entering Room: ') {
+        var worldName = escape(line.substr(offset + 15));
+        this.worldName = worldName;
+        var date = parseLogDate(line);
+        var parsed = [date, 'entering-room', worldName];
+        vrchatLogWatcher.emit('data', parsed);
+    }
+
+    if (c === 'J' && line.substr(offset, 13) === 'Joining wrld_') {
         var worldName = 'worldName' in this ? this.worldName : null;
         var location = escape(line.substr(offset + 8));
         var date = parseLogDate(line);
-        var parsed = [date, 'location', location, worldName];
+        var parsed = [date, 'joining-room', location, worldName];
+        vrchatLogWatcher.emit('data', parsed);
+        return parsed;
+    }
+
+    if (c === 'O' && line.substr(offset, 10) === 'OnLeftRoom') {
+        var date = parseLogDate(line);
+        var parsed = [date, 'left-room'];
         vrchatLogWatcher.emit('data', parsed);
         return parsed;
     }
@@ -73,28 +93,32 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
     // 2020.11.01 00:07:02 Log        -  [Player] Unregistering Rize♡
     // 2021.02.28 21:54:19 Log        -  [Behaviour] OnPlayerJoined pypy
     // 2021.02.28 21:54:19 Log        -  [Behaviour] Initialized PlayerAPI "pypy" is local
+    // 2021.02.28 23:43:09 Log        -  [Behaviour] OnLeftRoom
+    // 2021.02.28 23:43:09 Log        -  [Behaviour] Unregistering pypy
 
-    // if (line.substr(offset, 23) === 'Initialized PlayerAPI "') {
-    //     var pos = line.lastIndexOf('" is ');
-    //     if (pos < 0) {
-    //         return null;
-    //     }
-    //     var userDisplayName = line.substr(offset + 23, pos - (offset + 23));
-    //     var userType = line.substr(pos + 5);
-    //     var date = parseLogDate(line);
-    //     var parsed = ['player-joined', date, userDisplayName, userType];
-    //     vrchatLogWatcher.emit('data', parsed);
-    //     return parsed;
-    // }
+    var c = line[offset];
 
-    if (line[offset] === 'O') {
-        if (line.substr(offset, 15) === 'OnPlayerJoined ') {
-            var userDisplayName = escape(line.substr(offset + 15));
-            var date = parseLogDate(line);
-            var parsed = [date, 'player-joined', userDisplayName];
-            vrchatLogWatcher.emit('data', parsed);
-            return parsed;
+    if (c === 'I' && line.substr(offset, 23) === 'Initialized PlayerAPI "') {
+        var pos = line.lastIndexOf('" is ');
+        if (pos < 0) {
+            return null;
         }
+        var userDisplayName = escape(line.substr(offset + 23, pos - (offset + 23)));
+        var userType = escape(line.substr(pos + 5));
+        var date = parseLogDate(line);
+        var parsed = [date, 'player-joined', userDisplayName, userType];
+        vrchatLogWatcher.emit('data', parsed);
+        return parsed;
+    }
+
+    if (c === 'O') {
+        // if (line.substr(offset, 15) === 'OnPlayerJoined ') {
+        //     var userDisplayName = escape(line.substr(offset + 15));
+        //     var date = parseLogDate(line);
+        //     var parsed = [date, 'player-joined', userDisplayName];
+        //     vrchatLogWatcher.emit('data', parsed);
+        //     return parsed;
+        // }
         if (line.substr(offset, 13) === 'OnPlayerLeft ') {
             var userDisplayName = escape(line.substr(offset + 13));
             var date = parseLogDate(line);
@@ -110,7 +134,9 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
 function parseLogVideoPlayback(line, offset) {
     // 2021.02.28 22:22:23 Log        -  [Video Playback] Attempting to resolve URL 'https://youtu.be/SHIL6F4fz_Y'
 
-    if (line[offset] === 'A' && line.substr(offset, 26) === 'Attempting to resolve URL ') {
+    var c = line[offset];
+
+    if (c === 'A' && line.substr(offset, 26) === 'Attempting to resolve URL ') {
         var url = line.substr(offset + 26);
         if (url.startsWith("'") === true && url.endsWith("'") === true) {
             url = url.substr(1, url.length - 2);
@@ -128,7 +154,9 @@ function parseLogVideoPlayback(line, offset) {
 function parseLogNotification(line, offset) {
     // 2021.01.03 05:48:58 Log        -  Received Notification: < Notification from username:pypy, sender user id:usr_4f76a584-9d4b-46f6-8209-8305eb683661 to of type: friendRequest, id: not_3a8f66eb-613c-4351-bee3-9980e6b5652c, created at: 01/14/2021 15:38:40 UTC, details: {{}}, type:friendRequest, m seen:False, message: ""> received at 01/02/2021 16:48:58 UTC
 
-    if (line[offset] === 'R' && line.substr(offset, 24) === 'Received Notification: <') {
+    var c = line[offset];
+
+    if (c === 'R' && line.substr(offset, 24) === 'Received Notification: <') {
         var pos = line.lastIndexOf('> received at ');
         if (pos < 0) {
             return null;
@@ -149,7 +177,8 @@ function parseLog(line) {
     }
 
     if (line[34] !== '[') {
-        parseLogNotification.call(this, line, 34);
+        // not use
+        // parseLogNotification.call(this, line, 34);
         return;
     }
 
