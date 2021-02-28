@@ -111,10 +111,11 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
         var user = line.substr(offset + 23, pos - (offset + 23));
         var type = line.substr(pos + 5);
         var time = parseLogTime(line);
+        var location = 'location' in this ? this.location : null;
         if (type === 'local') {
             this.user = user;
         }
-        emitLog([time, 'player-joined', user, type]);
+        emitLog([time, 'player-joined', user, type, location]);
         return true;
     }
 
@@ -129,7 +130,8 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
         if (line.substr(offset, 13) === 'OnPlayerLeft ') {
             var user = line.substr(offset + 13);
             var time = parseLogTime(line);
-            emitLog([time, 'player-left', user]);
+            var location = 'location' in this ? this.location : null;
+            emitLog([time, 'player-left', user, location]);
             return true;
         }
     }
