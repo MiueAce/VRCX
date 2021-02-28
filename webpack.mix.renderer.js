@@ -12,6 +12,7 @@ mix.override(function (webpackConfig) {
     webpackConfig.module.rules = webpackConfig.module.rules.filter(function (rule) {
         return String(rule.test) !== '/\\.(cjs|mjs|jsx?|tsx?)$/';
     });
+
     webpackConfig.module.rules.push({
         test: /\.pug$/,
         oneOf: [
@@ -24,6 +25,7 @@ mix.override(function (webpackConfig) {
             },
         ],
     });
+
     webpackConfig.plugins.push(
         new HtmlWebpackPlugin({
             filename: 'assets/index.html',
@@ -35,10 +37,7 @@ mix.override(function (webpackConfig) {
 });
 
 // fontawesome
-mix.copyDirectory(
-    'node_modules/@fortawesome/fontawesome-free/webfonts/',
-    'assets/vendor/fontawesome/webfonts/'
-);
+mix.copyDirectory('node_modules/@fortawesome/fontawesome-free/webfonts/', 'assets/vendor/fontawesome/webfonts/');
 mix.copyDirectory('node_modules/@fortawesome/fontawesome-free/css/all.min.css', 'assets/vendor/fontawesome/css/');
 
 // element-plus
