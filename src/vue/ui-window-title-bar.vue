@@ -11,7 +11,7 @@
 </template>
 
 <script>
-const { ipcRenderer } = window.electron;
+const { ipcRenderer } = window;
 
 export default {
     setup() {
