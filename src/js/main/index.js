@@ -57,6 +57,12 @@ const mainWindow = require('./main-window.js');
 
     ipcMain.handle('vrcx', function (event, ...args) {
         console.log('ipcMain.handle(vrcx)', event, args);
+
+        switch (args[0]) {
+            case 'get-app-locale':
+                return app.getLocale();
+        }
+
         return args;
     });
 
