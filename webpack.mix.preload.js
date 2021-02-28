@@ -1,4 +1,4 @@
-var mix = require('laravel-mix');
+const mix = require('laravel-mix');
 
 mix.disableNotifications();
 
