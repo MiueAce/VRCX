@@ -11,7 +11,7 @@ function getLogBaseName(filePath) {
     var basename = path.basename(filePath);
 
     if (/^output_log_.+\.txt$/i.test(basename) === false) {
-        return false;
+        return null;
     }
 
     return basename;
