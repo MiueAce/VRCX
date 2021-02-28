@@ -45,13 +45,13 @@ function parseLogLocation(line, offset) {
     // 2021.02.28 21:54:16 Log        -  [Behaviour] Joining wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd:9686~private(usr_4f76a584-9d4b-46f6-8209-8305eb683661)~nonce(C19B3A1933A318261DFFA497750CB160757EFA8F1B6C4FE3E77D16C1E3A9A80C)
     // 2021.02.28 21:54:16 Log        -  [Behaviour] Joining or Creating Room: VRChat Home
 
-    if (line.substr(offset, 15) === 'Entering Room: ') {
+    if (line[offset] === 'E' && line.substr(offset, 15) === 'Entering Room: ') {
         var worldName = escape(line.substr(offset + 15));
         this.worldName = worldName;
         return parsed;
     }
 
-    if (line.substr(offset, 13) === 'Joining wrld_') {
+    if (line[offset] === 'J' && line.substr(offset, 13) === 'Joining wrld_') {
         var worldName = 'worldName' in this ? this.worldName : null;
         var location = escape(line.substr(offset + 8));
         var date = parseLogDate(line);
@@ -87,20 +87,21 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
     //     return parsed;
     // }
 
-    if (line.substr(offset, 15) === 'OnPlayerJoined ') {
-        var userDisplayName = escape(line.substr(offset + 15));
-        var date = parseLogDate(line);
-        var parsed = [date, 'player-joined', userDisplayName];
-        console.log(parsed);
-        return parsed;
-    }
-
-    if (line.substr(offset, 13) === 'OnPlayerLeft ') {
-        var userDisplayName = escape(line.substr(offset + 13));
-        var date = parseLogDate(line);
-        var parsed = [date, 'player-left', userDisplayName];
-        console.log(parsed);
-        return parsed;
+    if (line[offset] === 'O') {
+        if (line.substr(offset, 15) === 'OnPlayerJoined ') {
+            var userDisplayName = escape(line.substr(offset + 15));
+            var date = parseLogDate(line);
+            var parsed = [date, 'player-joined', userDisplayName];
+            console.log(parsed);
+            return parsed;
+        }
+        if (line.substr(offset, 13) === 'OnPlayerLeft ') {
+            var userDisplayName = escape(line.substr(offset + 13));
+            var date = parseLogDate(line);
+            var parsed = [date, 'player-left', userDisplayName];
+            console.log(parsed);
+            return parsed;
+        }
     }
 
     return null;
@@ -109,7 +110,7 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
 function parseLogVideoPlayback(line, offset) {
     // 2021.02.28 22:22:23 Log        -  [Video Playback] Attempting to resolve URL 'https://youtu.be/SHIL6F4fz_Y'
 
-    if (line.substr(offset, 26) === 'Attempting to resolve URL ') {
+    if (line[offset] === 'A' && line.substr(offset, 26) === 'Attempting to resolve URL ') {
         var url = line.substr(offset + 26);
         if (url.startsWith("'") === true && url.endsWith("'") === true) {
             url = url.substr(1, url.length - 2);
@@ -127,7 +128,7 @@ function parseLogVideoPlayback(line, offset) {
 function parseLogNotification(line, offset) {
     // 2021.01.03 05:48:58 Log        -  Received Notification: < Notification from username:pypy, sender user id:usr_4f76a584-9d4b-46f6-8209-8305eb683661 to of type: friendRequest, id: not_3a8f66eb-613c-4351-bee3-9980e6b5652c, created at: 01/14/2021 15:38:40 UTC, details: {{}}, type:friendRequest, m seen:False, message: ""> received at 01/02/2021 16:48:58 UTC
 
-    if (line.substr(offset, 24) === 'Received Notification: <') {
+    if (line[offset] === 'R' && line.substr(offset, 24) === 'Received Notification: <') {
         var pos = line.lastIndexOf('> received at ');
         if (pos < 0) {
             return null;
@@ -147,13 +148,13 @@ function parseLog(line) {
         return;
     }
 
-    if (line.charAt(34) !== '[') {
+    if (line[34] !== '[') {
         parseLogNotification.call(this, line, 34);
         return;
     }
 
     var offset = line.indexOf('] ', 35);
-    if (offset < 35) {
+    if (offset < 0) {
         return;
     }
 
