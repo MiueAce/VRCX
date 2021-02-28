@@ -56,7 +56,7 @@ const mainWindow = require('./main-window.js');
     });
 
     ipcMain.handle('vrcx', function (event, ...args) {
-        console.log('ipcMain.handle(vrcx)', event, args);
+        console.log('ipcMain.handle(vrcx)', args);
 
         switch (args[0]) {
             case 'get-app-locale':
@@ -70,7 +70,7 @@ const mainWindow = require('./main-window.js');
     });
 
     ipcMain.on('vrcx', function (event, ...args) {
-        console.log('ipcMain.on(vrcx)', event, args);
+        console.log('ipcMain.on(vrcx)', args);
         event.returnValue = args;
 
         switch (args[0]) {
