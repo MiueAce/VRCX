@@ -2,6 +2,7 @@ const { app, ipcMain } = require('electron');
 const native = require('vrcx-native');
 const trayMenu = require('./tray-menu.js');
 const mainWindow = require('./main-window.js');
+const vrchatLogWatcher = require('./vrchat-log-watcher.js');
 
 (function () {
     app.setName('VRCX');
@@ -23,6 +24,7 @@ const mainWindow = require('./main-window.js');
     app.on('ready', function () {
         trayMenu.create();
         mainWindow.create();
+        vrchatLogWatcher.start();
     });
 
     app.on('second-instance', function () {
