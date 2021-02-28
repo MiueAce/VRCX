@@ -61,6 +61,9 @@ const mainWindow = require('./main-window.js');
         switch (args[0]) {
             case 'get-app-locale':
                 return app.getLocale();
+
+            default:
+                break;
         }
 
         return args;
@@ -81,6 +84,9 @@ const mainWindow = require('./main-window.js');
 
             case 'maximize-main-window':
                 mainWindow.maximize();
+                break;
+
+            default:
                 break;
         }
     });
