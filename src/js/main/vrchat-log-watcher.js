@@ -318,6 +318,13 @@ ipcMain.on('vrchat-log-watcher', function (event, command) {
             vrchatLogWatcher.stop();
             break;
 
+        case 'reset':
+            (async function () {
+                await vrchatLogWatcher.stop();
+                vrchatLogWatcher.start();
+            });
+            break;
+
         default:
             break;
     }
