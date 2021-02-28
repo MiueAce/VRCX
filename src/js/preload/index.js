@@ -1,11 +1,7 @@
-console.log('preload');
+const { ipcRenderer } = require('electron');
 
-import { ipcRenderer } from 'electron';
-window.ipcRenderer = ipcRenderer;
-
-var fs = require('fs');
-
-window.sex = function () {
-    console.log('it works');
-    console.log(fs.readdirSync('c:\\'));
+// only export ipcRenderer. But this is a security issue.
+// We have to write a wrapping function or find another way to handle it.
+window.electron = {
+    ipcRenderer,
 };
