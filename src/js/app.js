@@ -19,7 +19,7 @@ import App from '../vue/app.vue';
             en: {
                 locale: {
                     en: 'English',
-                    ko: '한국어',
+                    ko: 'Korean',
                 },
                 login: {
                     username: 'Username or Email',
@@ -28,6 +28,10 @@ import App from '../vue/app.vue';
                 },
             },
             ko: {
+                locale: {
+                    en: '영어',
+                    ko: '한국어',
+                },
                 login: {
                     username: '닉네임 혹은 이메일 주소',
                     password: '비밀번호',
