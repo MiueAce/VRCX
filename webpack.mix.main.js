@@ -5,6 +5,7 @@ mix.disableNotifications();
 mix.webpackConfig({
     target: 'electron-main',
     externals: {
+        fsevents: "require('fsevents')",
         'better-sqlite3': 'commonjs better-sqlite3',
         'vrcx-native': 'commonjs vrcx-native',
     },
