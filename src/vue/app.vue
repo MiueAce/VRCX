@@ -5,7 +5,8 @@ UIWindowTitleBar
 </template>
 
 <script>
-const { ref, reactive } = require('vue');
+const { ref, reactive, onMounted } = require('vue');
+const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
 
 import UIWindowTitleBar from './ui-window-title-bar.vue';
 import UILogin from './ui-login.vue';
@@ -22,6 +23,10 @@ export default {
         });
 
         const currentUser = ref(null);
+
+        onMounted(function () {
+            vrchatLogRepository.start();
+        });
 
         return {
             credentials,

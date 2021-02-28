@@ -55,7 +55,7 @@ function parseLogLocation(file, line, offset) {
     if (c === 'D' && line.substr(offset, 17) === 'Destination set: ') {
         var location = line.substr(offset + 17);
         var time = line.substr(0, 19);
-        vrchatLogWatcher.emit('data', file, [time, 'destination-set', location]);
+        vrchatLogWatcher.emit('data', file, [time, 'destination', location]);
         return true;
     }
 
