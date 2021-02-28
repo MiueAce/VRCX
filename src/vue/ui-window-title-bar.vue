@@ -17,13 +17,13 @@ export default {
     setup() {
         return {
             close() {
-                ipcRenderer.send('vrcx', 'close-main-window');
+                ipcRenderer.send('main-window', 'close');
             },
             minimize() {
-                ipcRenderer.send('vrcx', 'minimize-main-window');
+                ipcRenderer.send('main-window', 'minimize');
             },
             maximize() {
-                ipcRenderer.send('vrcx', 'maximize-main-window');
+                ipcRenderer.send('main-window', 'maximize');
             },
         };
     },

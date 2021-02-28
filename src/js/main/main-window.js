@@ -1,6 +1,6 @@
 const path = require('path');
 const { EventEmitter } = require('events');
-const { app, BrowserWindow, screen, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, shell } = require('electron');
 const native = require('vrcx-native');
 const { APP_PATH, APP_ICON } = require('./constants.js');
 const interceptWebRequest = require('./intercept-web-request.js');
@@ -153,6 +153,16 @@ class MainWindow extends EventEmitter {
         browserWindow.destroy();
     }
 
+    send(channel, ...args) {
+        var { browserWindow } = this;
+
+        if (browserWindow === null) {
+            return;
+        }
+
+        browserWindow.webContents.send(channel, ...args);
+    }
+
     activate() {
         var { browserWindow } = this;
 
@@ -203,6 +213,27 @@ class MainWindow extends EventEmitter {
         browserWindow.maximize();
     }
 }
+
+ipcMain.on('main-window', function (event, command) {
+    event.returnValue = null;
+
+    switch (command) {
+        case 'close':
+            mainWindow.close();
+            break;
+
+        case 'minimize':
+            mainWindow.minimize();
+            break;
+
+        case 'maximize':
+            mainWindow.maximize();
+            break;
+
+        default:
+            break;
+    }
+});
 
 mainWindow = new MainWindow();
 module.exports = mainWindow;

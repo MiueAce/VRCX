@@ -1,6 +1,6 @@
 const { EventEmitter } = require('events');
 const path = require('path');
-const { app } = require('electron');
+const { app, ipcMain } = require('electron');
 const chokidar = require('chokidar');
 const { Tail } = require('tail');
 
@@ -17,41 +17,21 @@ function getLogBaseName(filePath) {
     return basename;
 }
 
-function emitLog(file, data) {
-    vrchatLogWatcher.emit('data', file, data);
-}
-
-function parseLogTime(line) {
-    // try {
-    //     return new Date(
-    //         +line.substr(0, 4),
-    //         +line.substr(5, 2) - 1,
-    //         +line.substr(8, 2),
-    //         +line.substr(11, 2),
-    //         +line.substr(14, 2),
-    //         +line.substr(17, 2)
-    //     );
-    // } catch (err) {
-    //     return line;
-    // }
-    return line.substr(0, 19);
-}
-
 function parseLogAuth(file, line, offset) {
     // 2021.03.01 00:52:41 Log        -  [Behaviour] VRChat Build: VRChat 2021.1.3-1054-1c7ebce472-Release, Steam WindowsPlayer
 
     var c = line[offset];
 
     if (c === 'C' && line.substr(offset, 25) === 'Client invoked disconnect') {
-        var time = parseLogTime(line);
-        emitLog(file, [time, 'disconnect']);
+        var time = line.substr(0, 19);
+        vrchatLogWatcher.emit('data', file, [time, 'disconnect']);
         return true;
     }
 
     if (c === 'V' && line.substr(offset, 14) === 'VRChat Build: ') {
         var data = line.substr(offset);
-        var time = parseLogTime(line);
-        emitLog(file, [time, 'launch', data]);
+        var time = line.substr(0, 19);
+        vrchatLogWatcher.emit('data', file, [time, 'launch', data]);
         return true;
     }
 }
@@ -74,28 +54,28 @@ function parseLogLocation(file, line, offset) {
 
     if (c === 'D' && line.substr(offset, 17) === 'Destination set: ') {
         var location = line.substr(offset + 17);
-        var time = parseLogTime(line);
-        emitLog(file, [time, 'destination-set', location]);
+        var time = line.substr(0, 19);
+        vrchatLogWatcher.emit('data', file, [time, 'destination-set', location]);
         return true;
     }
 
     if (c === 'E' && line.substr(offset, 15) === 'Entering Room: ') {
         var world = line.substr(offset + 15);
-        var time = parseLogTime(line);
-        emitLog(file, [time, 'entering-room', world]);
+        var time = line.substr(0, 19);
+        vrchatLogWatcher.emit('data', file, [time, 'entering-room', world]);
         return true;
     }
 
     if (c === 'J' && line.substr(offset, 13) === 'Joining wrld_') {
         var location = line.substr(offset + 8);
-        var time = parseLogTime(line);
-        emitLog(file, [time, 'joining-room', location]);
+        var time = line.substr(0, 19);
+        vrchatLogWatcher.emit('data', file, [time, 'joining-room', location]);
         return true;
     }
 
     if (c === 'O' && line.substr(offset, 10) === 'OnLeftRoom') {
-        var time = parseLogTime(line);
-        emitLog(file, [time, 'left-room']);
+        var time = line.substr(0, 19);
+        vrchatLogWatcher.emit('data', file, [time, 'left-room']);
         return true;
     }
 
@@ -120,14 +100,14 @@ function parseLogOnPlayerJoinedOrLeft(file, line, offset) {
     if (c === 'O') {
         if (line.substr(offset, 15) === 'OnPlayerJoined ') {
             var user = line.substr(offset + 15);
-            var time = parseLogTime(line);
-            emitLog(file, [time, 'player-joined', user]);
+            var time = line.substr(0, 19);
+            vrchatLogWatcher.emit('data', file, [time, 'player-joined', user]);
             return true;
         }
         if (line.substr(offset, 13) === 'OnPlayerLeft ') {
             var user = line.substr(offset + 13);
-            var time = parseLogTime(line);
-            emitLog(file, [time, 'player-left', user]);
+            var time = line.substr(0, 19);
+            vrchatLogWatcher.emit('data', file, [time, 'player-left', user]);
             return true;
         }
     }
@@ -145,8 +125,8 @@ function parseLogVideoPlayback(file, line, offset) {
         if (url.startsWith("'") === true && url.endsWith("'") === true) {
             url = url.substr(1, url.length - 2);
         }
-        var time = parseLogTime(line);
-        emitLog(file, [time, 'video-url', url]);
+        var time = line.substr(0, 19);
+        vrchatLogWatcher.emit('data', file, [time, 'video-url', url]);
         return true;
     }
 
@@ -164,8 +144,8 @@ function parseLogNotification(file, line, offset) {
             return false;
         }
         var json = line.substr(offset + 24, pos - (offset + 24));
-        var time = parseLogTime(line);
-        emitLog(file, [time, 'notification', json]);
+        var time = line.substr(0, 19);
+        vrchatLogWatcher.emit('data', file, [time, 'notification', json]);
         return true;
     }
 
@@ -224,11 +204,11 @@ class VRChatLogWatcher extends EventEmitter {
             depth: 0,
         });
 
-        watcher
-            .on('error', (error) => console.error(`Watcher error: ${error}`))
-            .on('ready', () => console.log('Initial scan complete. Ready for changes'))
-            .on('add', (path) => console.log(`File ${path} has been added`))
-            .on('unlink', (path) => console.log(`File ${path} has been removed`));
+        // watcher
+        //     .on('error', (error) => console.error(`Watcher error: ${error}`))
+        //     .on('ready', () => console.log('Initial scan complete. Ready for changes'))
+        //     .on('add', (path) => console.log(`File ${path} has been added`))
+        //     .on('unlink', (path) => console.log(`File ${path} has been removed`));
 
         watcher.on('add', function (filePath) {
             setImmediate(function () {
@@ -320,4 +300,22 @@ class VRChatLogWatcher extends EventEmitter {
 }
 
 vrchatLogWatcher = new VRChatLogWatcher();
+
+ipcMain.on('vrchat-log-watcher', function (event, command) {
+    event.returnValue = null;
+
+    switch (command) {
+        case 'start':
+            vrchatLogWatcher.start();
+            break;
+
+        case 'stop':
+            vrchatLogWatcher.stop();
+            break;
+
+        default:
+            break;
+    }
+});
+
 module.exports = vrchatLogWatcher;

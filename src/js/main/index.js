@@ -1,4 +1,4 @@
-const { app, ipcMain } = require('electron');
+const { app } = require('electron');
 const native = require('vrcx-native');
 const trayMenu = require('./tray-menu.js');
 const mainWindow = require('./main-window.js');
@@ -24,7 +24,6 @@ const vrchatLogWatcher = require('./vrchat-log-watcher.js');
     app.on('ready', function () {
         trayMenu.create();
         mainWindow.create();
-        vrchatLogWatcher.start();
     });
 
     app.on('second-instance', function () {
@@ -58,50 +57,14 @@ const vrchatLogWatcher = require('./vrchat-log-watcher.js');
     });
 
     vrchatLogWatcher.on('watch', function (file) {
-        console.log('watch', file);
+        mainWindow.send('vrchat-log-watcher:watch', file);
     });
 
     vrchatLogWatcher.on('unwatch', function (file) {
-        console.log('unwatch', file);
+        mainWindow.send('vrchat-log-watcher:unwatch', file);
     });
 
     vrchatLogWatcher.on('data', function (file, data) {
-        console.log('data', file, data.map(escape));
-    });
-
-    ipcMain.handle('vrcx', function (event, ...args) {
-        console.log('ipcMain.handle(vrcx)', args);
-
-        switch (args[0]) {
-            case 'get-app-locale':
-                return app.getLocale();
-
-            default:
-                break;
-        }
-
-        return args;
-    });
-
-    ipcMain.on('vrcx', function (event, ...args) {
-        console.log('ipcMain.on(vrcx)', args);
-        event.returnValue = args;
-
-        switch (args[0]) {
-            case 'close-main-window':
-                mainWindow.close();
-                break;
-
-            case 'minimize-main-window':
-                mainWindow.minimize();
-                break;
-
-            case 'maximize-main-window':
-                mainWindow.maximize();
-                break;
-
-            default:
-                break;
-        }
+        mainWindow.send('vrchat-log-watcher:data', file, data);
     });
 })();
