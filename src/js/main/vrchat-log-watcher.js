@@ -106,6 +106,24 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
     return null;
 }
 
+function parseLogVideoPlayback(line, offset) {
+    // 2021.02.28 22:22:23 Log        -  [Video Playback] Attempting to resolve URL 'https://youtu.be/SHIL6F4fz_Y'
+
+    if (line.substr(offset, 26) === 'Attempting to resolve URL ') {
+        var url = line.substr(offset + 26);
+        if (url.startsWith("'") === true && url.endsWith("'") === true) {
+            url = url.substr(1, url.length - 2);
+        }
+        url = escape(url);
+        var date = parseLogDate(line);
+        var parsed = [date, 'video-url', url];
+        console.log(parsed);
+        return parsed;
+    }
+
+    return null;
+}
+
 function parseLogNotification(line, offset) {
     // 2021.01.03 05:48:58 Log        -  Received Notification: < Notification from username:pypy, sender user id:usr_4f76a584-9d4b-46f6-8209-8305eb683661 to of type: friendRequest, id: not_3a8f66eb-613c-4351-bee3-9980e6b5652c, created at: 01/14/2021 15:38:40 UTC, details: {{}}, type:friendRequest, m seen:False, message: ""> received at 01/02/2021 16:48:58 UTC
 
@@ -142,7 +160,8 @@ function parseLog(line) {
     offset += 2;
     if (
         parseLogOnPlayerJoinedOrLeft.call(this, line, offset) !== null ||
-        parseLogLocation.call(this, line, offset) !== null
+        parseLogLocation.call(this, line, offset) !== null ||
+        parseLogVideoPlayback.call(this, line, offset) !== null
     ) {
         // yo
     }
