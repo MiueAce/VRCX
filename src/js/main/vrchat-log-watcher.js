@@ -18,18 +18,19 @@ function getLogBaseName(filePath) {
 }
 
 function parseLogDate(line) {
-    try {
-        return new Date(
-            +line.substr(0, 4),
-            +line.substr(5, 2) - 1,
-            +line.substr(8, 2),
-            +line.substr(11, 2),
-            +line.substr(14, 2),
-            +line.substr(17, 2)
-        );
-    } catch (err) {
-        return line;
-    }
+    return line.substr(0, 19);
+    // try {
+    //     return new Date(
+    //         +line.substr(0, 4),
+    //         +line.substr(5, 2) - 1,
+    //         +line.substr(8, 2),
+    //         +line.substr(11, 2),
+    //         +line.substr(14, 2),
+    //         +line.substr(17, 2)
+    //     );
+    // } catch (err) {
+    //     return line;
+    // }
 }
 
 function parseLogLocation(line, offset) {
