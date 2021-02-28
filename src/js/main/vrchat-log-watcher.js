@@ -48,9 +48,6 @@ function parseLogLocation(line, offset) {
     if (line.substr(offset, 15) === 'Entering Room: ') {
         var worldName = escape(line.substr(offset + 15));
         this.worldName = worldName;
-        var date = parseLogDate(line);
-        var parsed = [date, 'location-worldname', worldName];
-        console.log(parsed);
         return parsed;
     }
 
@@ -128,7 +125,7 @@ function parseLogNotification(line, offset) {
 }
 
 function parseLog(line) {
-    if (line.length <= 36 || line.charAt(31) != '-') {
+    if (line.length <= 36 || line[20] !== 'L' || line[31] != '-') {
         return;
     }
 
