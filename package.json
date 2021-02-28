@@ -38,6 +38,7 @@
     "better-sqlite3": "^7.1.2",
     "chokidar": "^3.5.1",
     "element-plus": "^1.0.2-beta.32",
+    "tail": "^2.2.0",
     "vrcx-native": "file:vrcx-native",
     "vue": "^3.0.6",
     "vue-i18n": "^9.0.0"
