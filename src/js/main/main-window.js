@@ -48,8 +48,8 @@ class MainWindow extends EventEmitter {
         var browserWindow = new BrowserWindow({
             width: 800,
             height: 500,
-            minWidth: 800,
-            minHeight: 500,
+            minWidth: 400,
+            minHeight: 250,
             fullscreenable: false,
             title: 'VRCX',
             icon: APP_ICON,
