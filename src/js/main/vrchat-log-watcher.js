@@ -229,19 +229,20 @@ class VRChatLogWatcher extends EventEmitter {
         this.watcher = watcher;
     }
 
-    async stop() {
-        if (this.isBusy === true || this.watcher === null) {
-            return;
-        }
+    stop() {
+        var self = this;
 
-        this.isBusy = true;
+        return new Promise(function(resolve, reject) {
+            if (self.isBusy === true || self.watcher === null) {
+                resolve();
+                return;
+            }
 
-        try {
-            await this.watcher.close();
+            self.isBusy = true;
 
-            var self = this;
+            try {
+                await self.watcher.close();
 
-            return new Promise(function (resolve, reject) {
                 setImmediate(function () {
                     for (var filePath of self.tailMap.keys()) {
                         self.unwatchLog(filePath);
@@ -250,10 +251,11 @@ class VRChatLogWatcher extends EventEmitter {
                     self.isBusy = false;
                     resolve();
                 });
-            });
-        } catch (err) {
-            console.error(err);
-        }
+            } catch (err) {
+                console.error(err);
+                reject(err);
+            }
+        });
     }
 
     watchLog(filePath) {
