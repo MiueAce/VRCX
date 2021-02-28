@@ -11,6 +11,6 @@ mix.webpackConfig({
 });
 
 mix.copyDirectory('resources/', 'assets/');
-mix.js('src/js/main/main.js', 'assets/');
+mix.js('src/js/main/index.js', 'assets/main.js');
 
 mix.dump();
