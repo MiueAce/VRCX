@@ -194,15 +194,10 @@ class VRChatLogWatcher extends EventEmitter {
         });
 
         watcher
-            .on('add', (path) => console.log(`File ${path} has been added`))
-            .on('change', (path) => console.log(`File ${path} has been changed`))
-            .on('unlink', (path) => console.log(`File ${path} has been removed`));
-
-        watcher
-            .on('addDir', (path) => console.log(`Directory ${path} has been added`))
-            .on('unlinkDir', (path) => console.log(`Directory ${path} has been removed`))
             .on('error', (error) => console.error(`Watcher error: ${error}`))
-            .on('ready', () => console.log('Initial scan complete. Ready for changes'));
+            .on('ready', () => console.log('Initial scan complete. Ready for changes'))
+            .on('add', (path) => console.log(`File ${path} has been added`))
+            .on('unlink', (path) => console.log(`File ${path} has been removed`));
 
         watcher.on('add', function (filePath) {
             setImmediate(function () {
