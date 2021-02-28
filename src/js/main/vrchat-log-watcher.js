@@ -241,12 +241,15 @@ class VRChatLogWatcher extends EventEmitter {
 
             var self = this;
 
-            setImmediate(function () {
-                for (var filePath of self.tailMap.keys()) {
-                    self.unwatchLog(filePath);
-                }
-                self.watcher = null;
-                self.isBusy = false;
+            return new Promise(function (resolve, reject) {
+                setImmediate(function () {
+                    for (var filePath of self.tailMap.keys()) {
+                        self.unwatchLog(filePath);
+                    }
+                    self.watcher = null;
+                    self.isBusy = false;
+                    resolve();
+                });
             });
         } catch (err) {
             console.error(err);
