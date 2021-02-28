@@ -57,6 +57,10 @@ const vrchatLogWatcher = require('./vrchat-log-watcher.js');
         }, 5000);
     });
 
+    vrchatLogWatcher.on('data', function (data) {
+        console.log('vrchatLogWatcher', data);
+    });
+
     ipcMain.handle('vrcx', function (event, ...args) {
         console.log('ipcMain.handle(vrcx)', args);
 
