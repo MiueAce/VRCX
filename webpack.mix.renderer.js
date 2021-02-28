@@ -44,7 +44,7 @@ mix.copyDirectory(
 );
 mix.copyDirectory('node_modules/element-plus/lib/theme-chalk/index.css', 'assets/vendor/element-plus/lib/theme-chalk/');
 
-mix.js('src/js/app.js', 'assets/').vue();
+mix.js('src/js/renderer/app.js', 'assets/').vue();
 mix.sass('src/css/app.scss', 'assets/');
 
 mix.dump();

@@ -6,7 +6,7 @@ export default createI18n({
     locale: 'en',
     fallbackLocale: 'en',
     messages: availableLocales.reduce(function (messages, locale) {
-        messages[locale] = require(`./locale/${locale}.js`);
+        messages[locale] = require(`../../locale/${locale}.json`);
         return messages;
     }, {}),
 });

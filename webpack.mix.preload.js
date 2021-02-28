@@ -6,6 +6,6 @@ mix.webpackConfig({
     target: 'electron-preload',
 });
 
-mix.js('src/js/preload.js', 'assets/');
+mix.js('src/js/preload/preload.js', 'assets/');
 
 mix.dump();

@@ -1,6 +1,6 @@
 import { createApp } from 'vue';
 import ElementPlus from 'element-plus';
-import App from '../vue/app.vue';
+import App from '../../vue/app.vue';
 import i18n from './i18n.js';
 
 (async function () {
