@@ -21,6 +21,12 @@ function emitLog(data) {
     vrchatLogWatcher.emit('data', data);
 }
 
+function resetLogContext() {
+    this.user = null;
+    this.world = null;
+    this.location = null;
+}
+
 function parseLogTime(line) {
     // try {
     //     return new Date(
@@ -35,6 +41,28 @@ function parseLogTime(line) {
     //     return line;
     // }
     return line.substr(0, 19);
+}
+
+function parseLogAuth(line, offset) {
+    // 2021.03.01 00:52:41 Log        -  [Behaviour] VRChat Build: VRChat 2021.1.3-1054-1c7ebce472-Release, Steam WindowsPlayer
+
+    var c = line[offset];
+
+    if (c === 'C' && line.substr(offset, 25) === 'Client invoked disconnect') {
+        var time = parseLogTime(line);
+        var user = 'user' in this ? this.user : null;
+        resetLogContext.call(this);
+        emitLog([time, 'disconnect', user]);
+        return true;
+    }
+
+    if (c === 'V' && line.substr(offset, 14) === 'VRChat Build: ') {
+        var data = line.substr(offset);
+        var time = parseLogTime(line);
+        resetLogContext.call(this);
+        emitLog([time, 'launch', data]);
+        return true;
+    }
 }
 
 function parseLogLocation(line, offset) {
@@ -56,15 +84,17 @@ function parseLogLocation(line, offset) {
     if (c === 'D' && line.substr(offset, 17) === 'Destination set: ') {
         var location = line.substr(offset + 17);
         var time = parseLogTime(line);
-        emitLog([time, 'destination-set', location]);
+        var user = 'user' in this ? this.user : null;
+        emitLog([time, 'destination-set', location, user]);
         return true;
     }
 
     if (c === 'E' && line.substr(offset, 15) === 'Entering Room: ') {
         var world = line.substr(offset + 15);
         var time = parseLogTime(line);
+        var user = 'user' in this ? this.user : null;
         this.world = world;
-        // emitLog([time, 'entering-room', world]);
+        // emitLog([time, 'entering-room', world, user]);
         return true;
     }
 
@@ -72,16 +102,19 @@ function parseLogLocation(line, offset) {
         var location = line.substr(offset + 8);
         var time = parseLogTime(line);
         var world = 'world' in this ? this.world : null;
+        var user = 'user' in this ? this.user : null;
         this.location = location;
-        emitLog([time, 'joining-room', location, world]);
+        emitLog([time, 'joining-room', location, world, user]);
         return true;
     }
 
     if (c === 'O' && line.substr(offset, 10) === 'OnLeftRoom') {
         var time = parseLogTime(line);
+        var location = 'location' in this ? this.location : null;
         var user = 'user' in this ? this.user : null;
+        this.world = null;
         this.location = null;
-        emitLog([time, 'left-room', user]);
+        emitLog([time, 'left-room', location, user]);
         return true;
     }
 
@@ -103,30 +136,18 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
 
     var c = line[offset];
 
-    if (c === 'I' && line.substr(offset, 23) === 'Initialized PlayerAPI "') {
-        var pos = line.lastIndexOf('" is ');
-        if (pos < 0) {
-            return false;
-        }
-        var user = line.substr(offset + 23, pos - (offset + 23));
-        var type = line.substr(pos + 5);
-        var time = parseLogTime(line);
-        var location = 'location' in this ? this.location : null;
-        if (type === 'local') {
-            this.user = user;
-        }
-        emitLog([time, 'player-joined', user, type, location]);
-        return true;
-    }
-
     if (c === 'O') {
-        // if (line.substr(offset, 15) === 'OnPlayerJoined ') {
-        //     var user = escape(line.substr(offset + 15));
-        //     var time = parseLogTime(line);
-        //     var data = [time, 'player-joined', user];
-        //     emitLog(data);
-        //     return true;
-        // }
+        if (line.substr(offset, 15) === 'OnPlayerJoined ') {
+            var user = line.substr(offset + 15);
+            var time = parseLogTime(line);
+            var location = 'location' in this ? this.location : null;
+            if ('user' in this === false || this.user === null) {
+                _user = user;
+                this.user = user;
+            }
+            emitLog([time, 'player-joined', user, location]);
+            return true;
+        }
         if (line.substr(offset, 13) === 'OnPlayerLeft ') {
             var user = line.substr(offset + 13);
             var time = parseLogTime(line);
@@ -196,7 +217,8 @@ function parseLog(line) {
     if (
         parseLogOnPlayerJoinedOrLeft.call(this, line, offset) === true ||
         parseLogLocation.call(this, line, offset) === true ||
-        parseLogVideoPlayback.call(this, line, offset) === true
+        parseLogVideoPlayback.call(this, line, offset) === true ||
+        parseLogAuth.call(this, line, offset) === true
     ) {
         // yo
     }
@@ -292,9 +314,7 @@ class VRChatLogWatcher extends EventEmitter {
             fromBeginning: true,
         });
 
-        tail.user = null;
-        tail.world = null;
-        tail.location = null;
+        resetLogContext.call(tail);
 
         tail.on('error', function (err) {
             console.error(err);
