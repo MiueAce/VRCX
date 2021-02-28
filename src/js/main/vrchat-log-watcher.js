@@ -11,14 +11,17 @@ function getLogBaseName(filePath) {
     var basename = path.basename(filePath);
 
     if (/^output_log_.+\.txt$/i.test(basename) === false) {
-        return null;
+        return false;
     }
 
     return basename;
 }
 
-function parseLogDate(line) {
-    return line.substr(0, 19);
+function emitLog(data) {
+    vrchatLogWatcher.emit('data', data);
+}
+
+function parseLogTime(line) {
     // try {
     //     return new Date(
     //         +line.substr(0, 4),
@@ -31,6 +34,7 @@ function parseLogDate(line) {
     // } catch (err) {
     //     return line;
     // }
+    return line.substr(0, 19);
 }
 
 function parseLogLocation(line, offset) {
@@ -50,38 +54,38 @@ function parseLogLocation(line, offset) {
     var c = line[offset];
 
     if (c === 'D' && line.substr(offset, 17) === 'Destination set: ') {
-        var location = escape(line.substr(offset + 17));
-        var date = parseLogDate(line);
-        var parsed = [date, 'destination-set', location];
-        vrchatLogWatcher.emit('data', parsed);
-        return parsed;
+        var location = line.substr(offset + 17);
+        var time = parseLogTime(line);
+        emitLog([time, 'destination-set', location]);
+        return true;
     }
 
     if (c === 'E' && line.substr(offset, 15) === 'Entering Room: ') {
-        var worldName = escape(line.substr(offset + 15));
-        this.worldName = worldName;
-        var date = parseLogDate(line);
-        var parsed = [date, 'entering-room', worldName];
-        vrchatLogWatcher.emit('data', parsed);
+        var world = line.substr(offset + 15);
+        var time = parseLogTime(line);
+        this.world = world;
+        // emitLog([time, 'entering-room', world]);
+        return true;
     }
 
     if (c === 'J' && line.substr(offset, 13) === 'Joining wrld_') {
-        var worldName = 'worldName' in this ? this.worldName : null;
-        var location = escape(line.substr(offset + 8));
-        var date = parseLogDate(line);
-        var parsed = [date, 'joining-room', location, worldName];
-        vrchatLogWatcher.emit('data', parsed);
-        return parsed;
+        var location = line.substr(offset + 8);
+        var time = parseLogTime(line);
+        var world = 'world' in this ? this.world : null;
+        this.location = location;
+        emitLog([time, 'joining-room', location, world]);
+        return true;
     }
 
     if (c === 'O' && line.substr(offset, 10) === 'OnLeftRoom') {
-        var date = parseLogDate(line);
-        var parsed = [date, 'left-room'];
-        vrchatLogWatcher.emit('data', parsed);
-        return parsed;
+        var time = parseLogTime(line);
+        var user = 'user' in this ? this.user : null;
+        this.location = null;
+        emitLog([time, 'left-room', user]);
+        return true;
     }
 
-    return null;
+    return false;
 }
 
 function parseLogOnPlayerJoinedOrLeft(line, offset) {
@@ -102,34 +106,35 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
     if (c === 'I' && line.substr(offset, 23) === 'Initialized PlayerAPI "') {
         var pos = line.lastIndexOf('" is ');
         if (pos < 0) {
-            return null;
+            return false;
         }
-        var userDisplayName = escape(line.substr(offset + 23, pos - (offset + 23)));
-        var userType = escape(line.substr(pos + 5));
-        var date = parseLogDate(line);
-        var parsed = [date, 'player-joined', userDisplayName, userType];
-        vrchatLogWatcher.emit('data', parsed);
-        return parsed;
+        var user = line.substr(offset + 23, pos - (offset + 23));
+        var type = line.substr(pos + 5);
+        var time = parseLogTime(line);
+        if (type === 'local') {
+            this.user = user;
+        }
+        emitLog([time, 'player-joined', user, type]);
+        return true;
     }
 
     if (c === 'O') {
         // if (line.substr(offset, 15) === 'OnPlayerJoined ') {
-        //     var userDisplayName = escape(line.substr(offset + 15));
-        //     var date = parseLogDate(line);
-        //     var parsed = [date, 'player-joined', userDisplayName];
-        //     vrchatLogWatcher.emit('data', parsed);
-        //     return parsed;
+        //     var user = escape(line.substr(offset + 15));
+        //     var time = parseLogTime(line);
+        //     var data = [time, 'player-joined', user];
+        //     emitLog(data);
+        //     return true;
         // }
         if (line.substr(offset, 13) === 'OnPlayerLeft ') {
-            var userDisplayName = escape(line.substr(offset + 13));
-            var date = parseLogDate(line);
-            var parsed = [date, 'player-left', userDisplayName];
-            vrchatLogWatcher.emit('data', parsed);
-            return parsed;
+            var user = line.substr(offset + 13);
+            var time = parseLogTime(line);
+            emitLog([time, 'player-left', user]);
+            return true;
         }
     }
 
-    return null;
+    return false;
 }
 
 function parseLogVideoPlayback(line, offset) {
@@ -142,14 +147,12 @@ function parseLogVideoPlayback(line, offset) {
         if (url.startsWith("'") === true && url.endsWith("'") === true) {
             url = url.substr(1, url.length - 2);
         }
-        url = escape(url);
-        var date = parseLogDate(line);
-        var parsed = [date, 'video-url', url];
-        vrchatLogWatcher.emit('data', parsed);
-        return parsed;
+        var time = parseLogTime(line);
+        emitLog([time, 'video-url', url]);
+        return true;
     }
 
-    return null;
+    return false;
 }
 
 function parseLogNotification(line, offset) {
@@ -160,16 +163,15 @@ function parseLogNotification(line, offset) {
     if (c === 'R' && line.substr(offset, 24) === 'Received Notification: <') {
         var pos = line.lastIndexOf('> received at ');
         if (pos < 0) {
-            return null;
+            return false;
         }
-        var data = escape(line.substr(offset + 24, pos - (offset + 24)));
-        var date = parseLogDate(line);
-        var parsed = [date, 'notification', data];
-        vrchatLogWatcher.emit('data', parsed);
-        return parsed;
+        var json = line.substr(offset + 24, pos - (offset + 24));
+        var time = parseLogTime(line);
+        emitLog([time, 'notification', json]);
+        return true;
     }
 
-    return null;
+    return false;
 }
 
 function parseLog(line) {
@@ -190,9 +192,9 @@ function parseLog(line) {
 
     offset += 2;
     if (
-        parseLogOnPlayerJoinedOrLeft.call(this, line, offset) !== null ||
-        parseLogLocation.call(this, line, offset) !== null ||
-        parseLogVideoPlayback.call(this, line, offset) !== null
+        parseLogOnPlayerJoinedOrLeft.call(this, line, offset) === true ||
+        parseLogLocation.call(this, line, offset) === true ||
+        parseLogVideoPlayback.call(this, line, offset) === true
     ) {
         // yo
     }
@@ -287,6 +289,10 @@ class VRChatLogWatcher extends EventEmitter {
         tail = new Tail(filePath, {
             fromBeginning: true,
         });
+
+        tail.user = null;
+        tail.world = null;
+        tail.location = null;
 
         tail.on('error', function (err) {
             console.error(err);
