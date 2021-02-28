@@ -1,29 +1,25 @@
 <template lang="pug">
-#app-title-bar
-UILang
-UIWindowButton
+UIWindowTitleBar
 #app-content
     UILogin
 </template>
 
 <script>
-import { ref, computed, reactive, toRefs } from 'vue';
-import UIWindowButton from './ui-window-button.vue';
+const { ref } = require('vue');
+
+import UIWindowTitleBar from './ui-window-title-bar.vue';
 import UILogin from './ui-login.vue';
-import UILang from './ui-lang.vue';
 
 export default {
     components: {
-        UIWindowButton,
+        UIWindowTitleBar,
         UILogin,
-        UILang,
     },
-    setup(props, { attrs, slots, emit }) {
-        var state = reactive({
-            currentUser: null,
-        });
+    setup() {
+        const currentUser = ref(null);
+
         return {
-            ...toRefs(state),
+            currentUser,
         };
     },
 };

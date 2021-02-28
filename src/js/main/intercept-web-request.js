@@ -1,9 +1,12 @@
-module.exports = function(webRequest) {
+const { WebRequest } = require('electron');
+
+/** @param {WebRequest} webRequest */
+module.exports = function (webRequest) {
     var filter = {
         urls: ['https://api.vrchat.cloud/*'],
     };
 
-    webRequest.onBeforeSendHeaders(filter, function(details, callback) {
+    webRequest.onBeforeSendHeaders(filter, function (details, callback) {
         var { requestHeaders } = details;
 
         requestHeaders['Cache-Control'] = 'no-cache';
@@ -14,7 +17,7 @@ module.exports = function(webRequest) {
         });
     });
 
-    webRequest.onHeadersReceived(filter, function(details, callback) {
+    webRequest.onHeadersReceived(filter, function (details, callback) {
         var { responseHeaders } = details;
 
         if ('set-cookie' in responseHeaders) {

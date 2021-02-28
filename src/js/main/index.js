@@ -1,76 +1,81 @@
 const { app, ipcMain } = require('electron');
-const { APP_NAME } = require('./constants');
-const {
-    createMainWindow,
-    activateMainWindow,
-    minimizeMainWindow,
-    maximizeMainWindow,
-    closeMainWindow,
-} = require('./main-window');
-const { createTrayMenu, destroyTrayMenu } = require('./tray-menu');
 const native = require('vrcx-native');
-
-console.log('sample', native.sample());
-console.log('sum', native.sum(1, 2, 3, 4, 5, '6'));
+const trayMenu = require('./tray-menu.js');
+const mainWindow = require('./main-window.js');
 
 (function () {
-    app.setName(APP_NAME);
+    app.setName('VRCX');
     app.setAppUserModelId('moe.pypy.vrcx');
 
     if (app.requestSingleInstanceLock() === false) {
-        app.quit();
+        app.exit();
         return;
     }
+
+    console.log('sample', native.sample());
+    console.log('sum', native.sum(1, 2, 3, 4, 5, '6'));
 
     // for better performance to offscreen rendering
     app.disableHardwareAcceleration();
 
-    ipcMain.on('vrcx', function (event, ...args) {
-        console.log('ipcMain.on(vrcx)', args);
-        var params = args[0];
-        console.log('params', params);
-        if (Array.isArray(params) === true) {
-            switch (params[0]) {
-                case 'minimize-window':
-                    minimizeMainWindow();
-                    break;
-                case 'maximize-window':
-                    maximizeMainWindow();
-                    break;
-                case 'close-window':
-                    closeMainWindow();
-                    break;
-            }
-        }
-        // sendSync를 쓰는거 아니면 딱히
-        // event.reply('vrcx', ...args);
-    });
-
-    ipcMain.handle('vrcx', function (event, ...args) {
-        console.log('ipcMain.handle(vrcx)', args);
-        return args;
-    });
-
-    if (process.platform === 'darwin') {
-        app.on('before-quit', function () {
-            app.isForceQuit = true;
-        });
-    }
+    app.isForceQuit = false;
 
     app.on('ready', function () {
-        createMainWindow();
-        createTrayMenu();
+        trayMenu.create();
+        mainWindow.create();
     });
 
     app.on('second-instance', function () {
-        activateMainWindow();
+        mainWindow.activate();
     });
 
     app.on('activate', function () {
-        activateMainWindow();
+        mainWindow.activate();
     });
 
     app.on('will-quit', function () {
-        destroyTrayMenu();
+        trayMenu.destroy();
+    });
+
+    trayMenu.on('double-click', function () {
+        mainWindow.activate();
+    });
+
+    trayMenu.on('menu:open', function () {
+        mainWindow.activate();
+    });
+
+    trayMenu.on('menu:quit', function () {
+        app.isForceQuit = true;
+        app.quit();
+
+        // ensure exit
+        setTimeout(function () {
+            app.exit();
+        }, 5000);
+    });
+
+    ipcMain.handle('vrcx', function (event, ...args) {
+        console.log('ipcMain.handle(vrcx)', event, args);
+        return args;
+    });
+
+    ipcMain.on('vrcx', function (event, ...args) {
+        console.log('ipcMain.on(vrcx)', event, args);
+        event.returnValue = args;
+
+        switch (args[0]) {
+            case 'close-main-window':
+                mainWindow.close();
+                break;
+
+            case 'minimize-main-window':
+                mainWindow.minimize();
+                break;
+
+            case 'maximize-main-window':
+                mainWindow.maximize();
+                break;
+        }
     });
 })();

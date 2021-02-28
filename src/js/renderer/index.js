@@ -1,11 +1,12 @@
-import { createApp } from 'vue';
-import ElementPlus from 'element-plus';
-import App from '../../vue/app.vue';
-import i18n from './i18n.js';
+const { createApp } = require('vue');
+const ElementPlus = require('element-plus');
+const i18n = require('./i18n.js');
 
-(async function () {
+import App from '../../vue/app.vue';
+
+(function () {
     var app = createApp(App);
-    app.use(i18n);
     app.use(ElementPlus);
+    app.use(i18n);
     app.mount('#app');
 })();

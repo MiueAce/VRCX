@@ -1,12 +1,14 @@
-import { createI18n } from 'vue-i18n';
+const { createI18n } = require('vue-i18n');
 
 const availableLocales = ['en', 'ko'];
 
-export default createI18n({
+const messages = availableLocales.reduce(function (messages, locale) {
+    messages[locale] = require(`../../locale/${locale}.json`);
+    return messages;
+}, {});
+
+module.exports = createI18n({
     locale: 'en',
     fallbackLocale: 'en',
-    messages: availableLocales.reduce(function (messages, locale) {
-        messages[locale] = require(`../../locale/${locale}.json`);
-        return messages;
-    }, {}),
+    messages,
 });

@@ -11,30 +11,31 @@
 }
 
 #app-title-bar {
+    -webkit-app-region: drag;
+    z-index: 10000;
     display: flex;
-    margin: 3px;
+    margin: 2px;
     margin-bottom: 0;
     height: 25px;
-    -webkit-app-region: drag;
 }
 
-#app-title-window-button {
+#app-window-button-box {
+    -webkit-app-region: no-drag;
+    display: flex;
+    flex-direction: row;
     position: absolute;
     right: 0;
     top: 0;
     height: 22px;
-    display: flex;
-    flex-direction: row;
-    -webkit-app-region: no-drag;
 
     > i {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 12px;
         width: 30px;
         height: 100%;
         color: #888;
+        font-size: 12px;
 
         &:hover {
             color: #fff;
@@ -47,11 +48,11 @@
     }
 }
 
-#app-lang-button-group {
+#app-lang-button-box {
+    -webkit-app-region: no-drag;
     position: absolute;
     left: 0;
     top: 0;
-    -webkit-app-region: no-drag;
 }
 
 #app-content {
@@ -62,18 +63,18 @@
     overflow: hidden auto;
 }
 
-#ui-login {
+#app-login-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-#ui-login-box {
+#app-login {
     padding: 20px;
     width: 600px;
     background: #666;

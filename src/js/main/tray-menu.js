@@ -1,54 +1,65 @@
-const { app, Menu, Tray } = require('electron');
-const { APP_NAME, APP_ICON } = require('./constants');
-const { activateMainWindow } = require('./main-window');
+const { EventEmitter } = require('events');
+const { Menu, Tray } = require('electron');
+const { APP_ICON } = require('./constants');
 
-/** @type {?Tray} */
-var tray_ = null;
+/** @type {?TrayMenu} */
+var trayMenu = null;
 
-function createTrayMenu() {
-    if (tray_ !== null) {
-        return;
+class TrayMenu extends EventEmitter {
+    constructor() {
+        super();
+
+        /** @type {?Tray} */
+        this.tray = null;
     }
 
-    var menu = Menu.buildFromTemplate([
-        {
-            label: 'Open',
-            click() {
-                activateMainWindow();
-            },
-        },
-        {
-            type: 'separator',
-        },
-        {
-            label: 'Quit VRCX',
-            click() {
-                app.isForceQuit = true;
-                app.quit();
+    create() {
+        if (this.tray !== null) {
+            return;
+        }
 
-                setTimeout(function () {
-                    process.exit();
-                }, 5000);
-            },
-        },
-    ]);
+        var tray = new Tray(APP_ICON);
 
-    tray_ = new Tray(APP_ICON);
-    tray_.setToolTip(APP_NAME);
-    tray_.setContextMenu(menu);
-    tray_.on('double-click', function () {
-        activateMainWindow();
-    });
-}
+        tray.setToolTip('VRCX');
 
-function destroyTrayMenu() {
-    if (tray_ !== null) {
-        tray_.destroy();
-        tray_ = null;
+        tray.on('double-click', function () {
+            trayMenu.emit('double-click');
+        });
+
+        tray.setContextMenu(
+            Menu.buildFromTemplate([
+                {
+                    label: 'Open',
+                    click: function () {
+                        trayMenu.emit('menu:open');
+                    },
+                },
+                {
+                    type: 'separator',
+                },
+                {
+                    label: 'Quit VRCX',
+                    click: function () {
+                        trayMenu.emit('menu:quit');
+                    },
+                },
+            ])
+        );
+
+        this.tray = tray;
+    }
+
+    destroy() {
+        var { tray } = this;
+
+        if (tray === null) {
+            return;
+        }
+
+        this.tray = null;
+        tray.destroy();
     }
 }
 
-module.exports = {
-    createTrayMenu,
-    destroyTrayMenu,
-};
+trayMenu = new TrayMenu();
+module.exports = trayMenu;

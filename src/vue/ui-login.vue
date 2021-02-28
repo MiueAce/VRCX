@@ -1,6 +1,6 @@
 <template lang="pug">
-#ui-login
-    #ui-login-box
+#app-login-box
+    #app-login
         el-form(label-position="top" label-width="100px")
             el-form-item(:label="$t('login.username')")
                 el-input(v-model="username")
@@ -12,16 +12,16 @@
 </template>
 
 <script>
-import { ref, computed, reactive, toRefs } from 'vue';
+const { ref } = require('vue');
 
 export default {
-    setup(props, { attrs, slots, emit }) {
-        var state = reactive({
-            username: '',
-            password: '',
-        });
+    setup() {
+        const username = ref('');
+        const password = ref('');
+
         return {
-            ...toRefs(state),
+            username,
+            password,
         };
     },
 };
