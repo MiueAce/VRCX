@@ -17,14 +17,8 @@ function getLogBaseName(filePath) {
     return basename;
 }
 
-function emitLog(data) {
-    vrchatLogWatcher.emit('data', data);
-}
-
-function resetLogContext() {
-    this.user = null;
-    this.world = null;
-    this.location = null;
+function emitLog(file, data) {
+    vrchatLogWatcher.emit('data', file, data);
 }
 
 function parseLogTime(line) {
@@ -43,29 +37,26 @@ function parseLogTime(line) {
     return line.substr(0, 19);
 }
 
-function parseLogAuth(line, offset) {
+function parseLogAuth(file, line, offset) {
     // 2021.03.01 00:52:41 Log        -  [Behaviour] VRChat Build: VRChat 2021.1.3-1054-1c7ebce472-Release, Steam WindowsPlayer
 
     var c = line[offset];
 
     if (c === 'C' && line.substr(offset, 25) === 'Client invoked disconnect') {
         var time = parseLogTime(line);
-        var user = 'user' in this ? this.user : null;
-        resetLogContext.call(this);
-        emitLog([time, 'disconnect', user]);
+        emitLog(file, [time, 'disconnect']);
         return true;
     }
 
     if (c === 'V' && line.substr(offset, 14) === 'VRChat Build: ') {
         var data = line.substr(offset);
         var time = parseLogTime(line);
-        resetLogContext.call(this);
-        emitLog([time, 'launch', data]);
+        emitLog(file, [time, 'launch', data]);
         return true;
     }
 }
 
-function parseLogLocation(line, offset) {
+function parseLogLocation(file, line, offset) {
     // 2020.10.31 23:36:28 Log        -  [VRCFlowManagerVRC] Destination fetching: wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd
     // 2020.10.31 23:36:28 Log        -  [VRCFlowManagerVRC] Destination set: wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd
     // 2020.10.31 23:36:31 Log        -  [RoomManager] Entering Room: VRChat Home
@@ -84,44 +75,34 @@ function parseLogLocation(line, offset) {
     if (c === 'D' && line.substr(offset, 17) === 'Destination set: ') {
         var location = line.substr(offset + 17);
         var time = parseLogTime(line);
-        var user = 'user' in this ? this.user : null;
-        emitLog([time, 'destination-set', location, user]);
+        emitLog(file, [time, 'destination-set', location]);
         return true;
     }
 
     if (c === 'E' && line.substr(offset, 15) === 'Entering Room: ') {
         var world = line.substr(offset + 15);
         var time = parseLogTime(line);
-        var user = 'user' in this ? this.user : null;
-        this.world = world;
-        // emitLog([time, 'entering-room', world, user]);
+        emitLog(file, [time, 'entering-room', world]);
         return true;
     }
 
     if (c === 'J' && line.substr(offset, 13) === 'Joining wrld_') {
         var location = line.substr(offset + 8);
         var time = parseLogTime(line);
-        var world = 'world' in this ? this.world : null;
-        var user = 'user' in this ? this.user : null;
-        this.location = location;
-        emitLog([time, 'joining-room', location, world, user]);
+        emitLog(file, [time, 'joining-room', location]);
         return true;
     }
 
     if (c === 'O' && line.substr(offset, 10) === 'OnLeftRoom') {
         var time = parseLogTime(line);
-        var location = 'location' in this ? this.location : null;
-        var user = 'user' in this ? this.user : null;
-        this.world = null;
-        this.location = null;
-        emitLog([time, 'left-room', location, user]);
+        emitLog(file, [time, 'left-room']);
         return true;
     }
 
     return false;
 }
 
-function parseLogOnPlayerJoinedOrLeft(line, offset) {
+function parseLogOnPlayerJoinedOrLeft(file, line, offset) {
     // 2020.10.31 23:36:58 Log        -  [NetworkManager] OnPlayerJoined pypy
     // 2020.10.31 23:36:58 Log        -  [Player] Initialized PlayerAPI "pypy" is local
     // 2020.10.31 23:36:58 Log        -  [NetworkManager] OnPlayerJoined Rize♡
@@ -140,19 +121,13 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
         if (line.substr(offset, 15) === 'OnPlayerJoined ') {
             var user = line.substr(offset + 15);
             var time = parseLogTime(line);
-            var location = 'location' in this ? this.location : null;
-            if ('user' in this === false || this.user === null) {
-                _user = user;
-                this.user = user;
-            }
-            emitLog([time, 'player-joined', user, location]);
+            emitLog(file, [time, 'player-joined', user]);
             return true;
         }
         if (line.substr(offset, 13) === 'OnPlayerLeft ') {
             var user = line.substr(offset + 13);
             var time = parseLogTime(line);
-            var location = 'location' in this ? this.location : null;
-            emitLog([time, 'player-left', user, location]);
+            emitLog(file, [time, 'player-left', user]);
             return true;
         }
     }
@@ -160,7 +135,7 @@ function parseLogOnPlayerJoinedOrLeft(line, offset) {
     return false;
 }
 
-function parseLogVideoPlayback(line, offset) {
+function parseLogVideoPlayback(file, line, offset) {
     // 2021.02.28 22:22:23 Log        -  [Video Playback] Attempting to resolve URL 'https://youtu.be/SHIL6F4fz_Y'
 
     var c = line[offset];
@@ -171,14 +146,14 @@ function parseLogVideoPlayback(line, offset) {
             url = url.substr(1, url.length - 2);
         }
         var time = parseLogTime(line);
-        emitLog([time, 'video-url', url]);
+        emitLog(file, [time, 'video-url', url]);
         return true;
     }
 
     return false;
 }
 
-function parseLogNotification(line, offset) {
+function parseLogNotification(file, line, offset) {
     // 2021.01.03 05:48:58 Log        -  Received Notification: < Notification from username:pypy, sender user id:usr_4f76a584-9d4b-46f6-8209-8305eb683661 to of type: friendRequest, id: not_3a8f66eb-613c-4351-bee3-9980e6b5652c, created at: 01/14/2021 15:38:40 UTC, details: {{}}, type:friendRequest, m seen:False, message: ""> received at 01/02/2021 16:48:58 UTC
 
     var c = line[offset];
@@ -190,21 +165,21 @@ function parseLogNotification(line, offset) {
         }
         var json = line.substr(offset + 24, pos - (offset + 24));
         var time = parseLogTime(line);
-        emitLog([time, 'notification', json]);
+        emitLog(file, [time, 'notification', json]);
         return true;
     }
 
     return false;
 }
 
-function parseLog(line) {
+function parseLog(file, line) {
     if (line.length <= 36 || line[20] !== 'L' || line[31] != '-') {
         return;
     }
 
     if (line[34] !== '[') {
         // not use
-        // parseLogNotification.call(this, line, 34);
+        // parseLogNotification(file, line, 34);
         return;
     }
 
@@ -215,10 +190,10 @@ function parseLog(line) {
 
     offset += 2;
     if (
-        parseLogOnPlayerJoinedOrLeft.call(this, line, offset) === true ||
-        parseLogLocation.call(this, line, offset) === true ||
-        parseLogVideoPlayback.call(this, line, offset) === true ||
-        parseLogAuth.call(this, line, offset) === true
+        parseLogOnPlayerJoinedOrLeft(file, line, offset) === true ||
+        parseLogLocation(file, line, offset) === true ||
+        parseLogVideoPlayback(file, line, offset) === true ||
+        parseLogAuth(file, line, offset) === true
     ) {
         // yo
     }
@@ -287,10 +262,9 @@ class VRChatLogWatcher extends EventEmitter {
             var self = this;
 
             setImmediate(function () {
-                for (var tail of self.tailMap.values()) {
-                    tail.unwatch();
+                for (var filePath of self.tailMap.keys()) {
+                    self.unwatchLog(filePath);
                 }
-                self.tailMap.clear();
                 self.watcher = null;
                 self.isBusy = false;
             });
@@ -300,12 +274,12 @@ class VRChatLogWatcher extends EventEmitter {
     }
 
     watchLog(filePath) {
-        var name = getLogBaseName(filePath);
-        if (name === null) {
+        var file = getLogBaseName(filePath);
+        if (file === null) {
             return;
         }
 
-        var tail = this.tailMap.get(name);
+        var tail = this.tailMap.get(file);
         if (typeof tail !== 'undefined') {
             return;
         }
@@ -314,31 +288,34 @@ class VRChatLogWatcher extends EventEmitter {
             fromBeginning: true,
         });
 
-        resetLogContext.call(tail);
-
         tail.on('error', function (err) {
-            console.error(err);
+            console.error(file, err);
             vrchatLogWatcher.unwatchLog(filePath);
         });
 
-        tail.on('line', parseLog);
+        tail.on('line', function (line) {
+            parseLog(file, line);
+        });
 
-        this.tailMap.set(name, tail);
+        this.tailMap.set(file, tail);
+        this.emit('watch', file);
     }
 
     unwatchLog(filePath) {
-        var name = getLogBaseName(filePath);
-        if (name === null) {
+        var file = getLogBaseName(filePath);
+        if (file === null) {
             return;
         }
 
-        var tail = this.tailMap.get(name);
+        var tail = this.tailMap.get(file);
         if (typeof tail === 'undefined') {
             return;
         }
 
         tail.unwatch();
-        this.tailMap.delete(name);
+
+        this.tailMap.delete(file);
+        this.emit('unwatch', file);
     }
 }
 
