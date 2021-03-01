@@ -20,13 +20,13 @@ export default {
         return {
             logCount,
             close() {
-                ipcRenderer.send('main-window', 'close');
+                ipcRenderer.send('main-window:close');
             },
             minimize() {
-                ipcRenderer.send('main-window', 'minimize');
+                ipcRenderer.send('main-window:minimize');
             },
             maximize() {
-                ipcRenderer.send('main-window', 'maximize');
+                ipcRenderer.send('main-window:maximize');
             },
         };
     },

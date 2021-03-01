@@ -217,25 +217,19 @@ class MainWindow extends EventEmitter {
     }
 }
 
-ipcMain.on('main-window', function (event, command) {
+ipcMain.on('main-window:close', function (event) {
     event.returnValue = null;
+    mainWindow.close();
+});
 
-    switch (command) {
-        case 'close':
-            mainWindow.close();
-            break;
+ipcMain.on('main-window:minimize', function (event) {
+    event.returnValue = null;
+    mainWindow.minimize();
+});
 
-        case 'minimize':
-            mainWindow.minimize();
-            break;
-
-        case 'maximize':
-            mainWindow.maximize();
-            break;
-
-        default:
-            break;
-    }
+ipcMain.on('main-window:maximize', function (event) {
+    event.returnValue = null;
+    mainWindow.maximize();
 });
 
 mainWindow = new MainWindow();
