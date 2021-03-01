@@ -122,8 +122,6 @@ class MainWindow extends EventEmitter {
         webContents.on('will-navigate', function (event, url) {
             console.log('will-navigate', event, url);
             event.preventDefault();
-
-            shell.openExternal(url);
         });
 
         session.on('will-download', function (event) {
