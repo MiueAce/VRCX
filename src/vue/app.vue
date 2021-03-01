@@ -1,11 +1,13 @@
 <template lang="pug">
 UIWindowTitleBar
 #app-content
-    UILogin(:credentials="credentials" @submit="submitLogin")
+    UILogin(v-show="isLoggedIn === false")
+    template(v-show="isLoggedIn === true")
+        div logged in yo
 </template>
 
 <script>
-const { ref, reactive, onMounted } = require('vue');
+const vrchatApi = require('../js/renderer/vrchat-api.js');
 const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
 
 import UIWindowTitleBar from './ui-window-title-bar.vue';
@@ -17,23 +19,14 @@ export default {
         UILogin,
     },
     setup() {
-        const credentials = reactive({
-            username: '',
-            password: '',
-        });
-
-        const currentUser = ref(null);
-
-        onMounted(function () {
+        setTimeout(function () {
             vrchatLogRepository.reset();
-        });
+        }, 1);
+
+        vrchatApi.on('current-user', console.log);
 
         return {
-            credentials,
-            currentUser,
-            submitLogin(provider) {
-                console.log('submitLogin', provider);
-            },
+            isLoggedIn: vrchatApi.isLoggedIn,
         };
     },
 };

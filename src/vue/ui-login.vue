@@ -1,23 +1,71 @@
 <template lang="pug">
 #app-login-box
-    #app-login
+    #app-login(v-loading="isLoading")
         el-form(label-position="top" label-width="100px")
             el-form-item(:label="$t('login.username')")
-                el-input(v-model="credentials.username")
+                el-input(v-model="username")
             el-form-item(:label="$t('login.password')")
-                el-input(v-model="credentials.password")
+                el-input(v-model="password")
             el-form-item
-                el-button(type="primary" @click="$emit('submit', 'vrchat')")
-                    | {{ $t('login.submit')}}
+                el-button(type="primary" native-type="submit" @click="onSubmitLogin")
+                    | {{ $t('login.login')}}
         div
-            | username="{{ credentials.username }}", password="{{ credentials.password }}"
+            | username="{{ username }}", password="{{ password }}"
 </template>
 
 <script>
-const { ref } = require('vue');
+const { ref, onMounted } = require('vue');
+const vrchatApi = require('../js/renderer/vrchat-api.js');
 
 export default {
-    props: ['credentials'],
-    emits: ['submit'],
+    setup() {
+        const isLoading = ref(false);
+        const username = ref('');
+        const password = ref('');
+
+        onMounted(async function () {
+            if (isLoading.value === true) {
+                return;
+            }
+
+            // TODO: check login
+            isLoading.value = true;
+
+            try {
+                await vrchatApi.getConfig();
+                var json = await vrchatApi.getCurrentUser();
+                if ('requiresTwoFactorAuth' in json) {
+                }
+            } catch (err) {
+                console.error(err);
+            }
+
+            isLoading.value = false;
+        });
+
+        return {
+            isLoading,
+            username,
+            password,
+            async onSubmitLogin() {
+                if (isLoading.value === true) {
+                    return;
+                }
+
+                isLoading.value = true;
+
+                try {
+                    await vrchatApi.getConfig();
+                    var json = await vrchatApi.login(username.value, password.value);
+                    if ('requiresTwoFactorAuth' in json) {
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+
+                isLoading.value = false;
+            },
+        };
+    },
 };
 </script>
