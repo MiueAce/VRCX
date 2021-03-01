@@ -82,7 +82,7 @@ function parseLogLocation(file, line, offset) {
     return false;
 }
 
-function parseLogOnPlayerJoinedOrLeft(file, line, offset) {
+function parseLogPlayerJoinedOrLeft(file, line, offset) {
     // 2020.10.31 23:36:58 Log        -  [NetworkManager] OnPlayerJoined pypy
     // 2020.10.31 23:36:58 Log        -  [Player] Initialized PlayerAPI "pypy" is local
     // 2020.10.31 23:36:58 Log        -  [NetworkManager] OnPlayerJoined Rize♡
@@ -175,7 +175,7 @@ function parseLog(file, line) {
     }
 
     if (
-        parseLogOnPlayerJoinedOrLeft(file, line, offset) === true ||
+        parseLogPlayerJoinedOrLeft(file, line, offset) === true ||
         parseLogLocation(file, line, offset) === true ||
         parseLogVideoPlayback(file, line, offset) === true ||
         parseLogAuth(file, line, offset) === true
