@@ -153,7 +153,7 @@ function parseLogNotification(file, line, offset) {
 }
 
 function parseLog(file, line) {
-    if (line.length <= 36 || line[20] !== 'L' || line[31] != '-') {
+    if (line.length <= 37 || line[20] !== 'L' || line[31] != '-') {
         return;
     }
 
