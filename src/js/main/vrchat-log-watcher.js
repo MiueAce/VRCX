@@ -18,6 +18,7 @@ function getLogBaseName(filePath) {
 }
 
 function parseLogAuth(file, line, offset) {
+    // 2021.03.01 00:02:24 Log        -  [Behaviour] Client invoked disconnect.
     // 2021.03.01 00:52:41 Log        -  [Behaviour] VRChat Build: VRChat 2021.1.3-1054-1c7ebce472-Release, Steam WindowsPlayer
 
     var firstLetter = line[offset];
