@@ -163,12 +163,16 @@ function parseLog(file, line) {
         return;
     }
 
-    var offset = line.indexOf('] ', 35);
-    if (offset < 0) {
-        return;
-    }
+    var offset = 46;
 
-    offset += 2;
+    // 2021.03.01 00:13:30 Log        -  [Behaviour] VRChat Build: VRChat 2021.1.3-1054-1c7ebce472-Release, Steam WindowsPlayer
+    if (line[44] !== ']') {
+        offset = line.indexOf('] ', 35);
+        if (offset < 0) {
+            return;
+        }
+        offset += 2;
+    }
 
     if (
         parseLogOnPlayerJoinedOrLeft(file, line, offset) === true ||
