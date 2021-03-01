@@ -38,6 +38,9 @@ const db = require('./db.js');
 
     app.on('will-quit', function () {
         trayMenu.destroy();
+        setImmediate(function () {
+            db.close();
+        });
     });
 
     trayMenu.on('double-click', function () {
