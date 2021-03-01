@@ -6,6 +6,7 @@
     "login": {
         "username": "Username or Email",
         "password": "Password",
-        "submit": "Login"
+        "login": "Login",
+        "logout": "Logout"
     }
 }
