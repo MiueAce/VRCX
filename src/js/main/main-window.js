@@ -163,7 +163,8 @@ class MainWindow extends EventEmitter {
             return;
         }
 
-        browserWindow.webContents.send(channel, ...args);
+        var { webContents } = browserWindow;
+        webContents.send.apply(webContents, arguments);
     }
 
     activate() {
