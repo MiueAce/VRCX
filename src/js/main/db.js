@@ -41,43 +41,43 @@ class DB {
         this.sqlite3 = null;
     }
 
-    transaction(fn) {
+    transaction(callback) {
         var { sqlite3 } = this;
 
         if (sqlite3 === null) {
             return null;
         }
 
-        return sqlite3.transaction(fn);
+        return sqlite3.transaction(callback);
     }
 
-    prepare(source) {
+    prepare(query) {
         var { sqlite3 } = this;
 
         if (sqlite3 === null) {
             return null;
         }
 
-        return sqlite3.prepare(source);
+        return sqlite3.prepare(query);
     }
 
-    exec(source) {
+    exec(query) {
         var { sqlite3 } = this;
 
         if (sqlite3 === null) {
             return null;
         }
 
-        return sqlite3.exec(source);
+        return sqlite3.exec(query);
     }
 }
 
-ipcMain.handle('db:query', function (event, query, args) {
+ipcMain.handle('db:query', function (event, query, params) {
     try {
         var stmt = db.prepare(query);
 
-        if (Array.isArray(args) === true) {
-            return stmt.all.apply(stmt, args);
+        if (Array.isArray(params) === true) {
+            return stmt.all.apply(stmt, params);
         }
 
         return stmt.all();
@@ -87,7 +87,7 @@ ipcMain.handle('db:query', function (event, query, args) {
     }
 });
 
-ipcMain.handle('db:exec', function (event, source) {
+ipcMain.handle('db:exec', function (event, query) {
     try {
         return db.exec(query);
     } catch (err) {
