@@ -2,7 +2,7 @@ const path = require('path');
 const { EventEmitter } = require('events');
 const { app, BrowserWindow, ipcMain, screen, shell } = require('electron');
 const native = require('vrcx-native');
-const { APP_PATH, APP_ICON } = require('./constants.js');
+const { APP_ICON } = require('./constants.js');
 const interceptWebRequest = require('./intercept-web-request.js');
 
 /** @type {?MainWindow} */
@@ -45,6 +45,8 @@ class MainWindow extends EventEmitter {
             return;
         }
 
+        var preload = path.join(app.getAppPath(), 'assets/preload.js');
+
         var browserWindow = new BrowserWindow({
             width: 800,
             height: 500,
@@ -55,12 +57,13 @@ class MainWindow extends EventEmitter {
             icon: APP_ICON,
             frame: false,
             webPreferences: {
-                preload: path.join(APP_PATH, 'assets/preload.js'),
+                preload,
                 // partition: 'persist:vrcx',
                 defaultEncoding: 'utf-8',
                 spellcheck: false,
             },
         });
+
         var { webContents } = browserWindow;
         var { session } = webContents;
 
