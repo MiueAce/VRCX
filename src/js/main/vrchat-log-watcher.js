@@ -122,7 +122,7 @@ function parseLogVideoPlayback(file, line, offset) {
 
     if (firstLetter === 'A' && line.startsWith('Attempting to resolve URL ', offset) === true) {
         var url = line.substr(offset + 26);
-        if (url.startsWith("'") === true && url.endsWith("'") === true) {
+        if (url.length >= 2 && url[0] === "'" && url[url.length - 1] === "'") {
             url = url.substr(1, url.length - 2);
         }
         var time = line.substr(0, 19);
