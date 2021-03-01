@@ -37,8 +37,9 @@ class DB {
             return;
         }
 
-        sqlite3.close();
         this.sqlite3 = null;
+
+        sqlite3.close();
     }
 
     transaction(callback) {
@@ -83,8 +84,9 @@ ipcMain.handle('db:query', function (event, query, params) {
         return stmt.all();
     } catch (err) {
         console.error(err);
-        return null;
     }
+
+    return null;
 });
 
 ipcMain.handle('db:exec', function (event, query) {
@@ -92,8 +94,9 @@ ipcMain.handle('db:exec', function (event, query) {
         return db.exec(query);
     } catch (err) {
         console.error(err);
-        return null;
     }
+
+    return null;
 });
 
 db = new DB();

@@ -45,8 +45,6 @@ class MainWindow extends EventEmitter {
             return;
         }
 
-        var preload = path.join(app.getAppPath(), 'assets/preload.js');
-
         var browserWindow = new BrowserWindow({
             width: 800,
             height: 500,
@@ -57,7 +55,7 @@ class MainWindow extends EventEmitter {
             icon: APP_ICON,
             frame: false,
             webPreferences: {
-                preload,
+                preload: path.join(app.getAppPath(), 'assets/preload.js'),
                 // partition: 'persist:vrcx',
                 defaultEncoding: 'utf-8',
                 spellcheck: false,
@@ -153,6 +151,7 @@ class MainWindow extends EventEmitter {
         }
 
         this.browserWindow = null;
+
         browserWindow.destroy();
     }
 

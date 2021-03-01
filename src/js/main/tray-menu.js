@@ -57,6 +57,7 @@ class TrayMenu extends EventEmitter {
         }
 
         this.tray = null;
+
         tray.destroy();
     }
 }
