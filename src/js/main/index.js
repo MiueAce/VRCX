@@ -3,6 +3,7 @@ const native = require('vrcx-native');
 const trayMenu = require('./tray-menu.js');
 const mainWindow = require('./main-window.js');
 const vrchatLogWatcher = require('./vrchat-log-watcher.js');
+const db = require('./db.js');
 
 (function () {
     app.setName('VRCX');
@@ -22,6 +23,7 @@ const vrchatLogWatcher = require('./vrchat-log-watcher.js');
     app.isForceQuit = false;
 
     app.on('ready', function () {
+        db.create();
         trayMenu.create();
         mainWindow.create();
     });
@@ -52,6 +54,7 @@ const vrchatLogWatcher = require('./vrchat-log-watcher.js');
 
         // ensure exit
         setTimeout(function () {
+            db.close();
             app.exit();
         }, 5000);
     });
