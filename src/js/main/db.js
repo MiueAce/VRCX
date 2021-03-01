@@ -1,7 +1,6 @@
 const path = require('path');
 const { app, ipcMain } = require('electron');
 const BetterSqlite3 = require('better-sqlite3');
-const { setMaxListeners } = require('./vrchat-log-watcher');
 
 /** @type {?DB} */
 var db = null;
