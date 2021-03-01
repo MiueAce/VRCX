@@ -39,7 +39,7 @@ const db = require('./db.js');
     app.on('will-quit', function () {
         trayMenu.destroy();
         setImmediate(function () {
-            db.close();
+            db.destroy();
         });
     });
 
@@ -57,7 +57,7 @@ const db = require('./db.js');
 
         // ensure exit
         setTimeout(function () {
-            db.close();
+            db.destroy();
             app.exit();
         }, 5000);
     });
