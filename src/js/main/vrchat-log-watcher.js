@@ -20,15 +20,15 @@ function getLogBaseName(filePath) {
 function parseLogAuth(file, line, offset) {
     // 2021.03.01 00:52:41 Log        -  [Behaviour] VRChat Build: VRChat 2021.1.3-1054-1c7ebce472-Release, Steam WindowsPlayer
 
-    var c = line[offset];
+    var firstLetter = line[offset];
 
-    if (c === 'C' && line.substr(offset, 25) === 'Client invoked disconnect') {
+    if (firstLetter === 'C' && line.startsWith('Client invoked disconnect', offset) === true) {
         var time = line.substr(0, 19);
         vrchatLogWatcher.emit('data', file, [time, 'disconnect']);
         return true;
     }
 
-    if (c === 'V' && line.substr(offset, 14) === 'VRChat Build: ') {
+    if (firstLetter === 'V' && line.startsWith('VRChat Build: ', offset) === true) {
         var data = line.substr(offset);
         var time = line.substr(0, 19);
         vrchatLogWatcher.emit('data', file, [time, 'launch', data]);
@@ -50,30 +50,30 @@ function parseLogLocation(file, line, offset) {
     // 2021.02.28 21:54:16 Log        -  [Behaviour] Joining or Creating Room: VRChat Home
     // 2021.02.28 23:55:01 Log        -  [Behaviour] OnLeftRoom
 
-    var c = line[offset];
+    var firstLetter = line[offset];
 
-    if (c === 'D' && line.substr(offset, 17) === 'Destination set: ') {
+    if (firstLetter === 'D' && line.startsWith('Destination set: ', offset) === true) {
         var location = line.substr(offset + 17);
         var time = line.substr(0, 19);
         vrchatLogWatcher.emit('data', file, [time, 'destination', location]);
         return true;
     }
 
-    if (c === 'E' && line.substr(offset, 15) === 'Entering Room: ') {
+    if (firstLetter === 'E' && line.startsWith('Entering Room: ', offset) === true) {
         var world = line.substr(offset + 15);
         var time = line.substr(0, 19);
         vrchatLogWatcher.emit('data', file, [time, 'entering-room', world]);
         return true;
     }
 
-    if (c === 'J' && line.substr(offset, 13) === 'Joining wrld_') {
+    if (firstLetter === 'J' && line.startsWith('Joining wrld_', offset) === true) {
         var location = line.substr(offset + 8);
         var time = line.substr(0, 19);
         vrchatLogWatcher.emit('data', file, [time, 'joining-room', location]);
         return true;
     }
 
-    if (c === 'O' && line.substr(offset, 10) === 'OnLeftRoom') {
+    if (firstLetter === 'O' && line.startsWith('OnLeftRoom', offset) === true) {
         var time = line.substr(0, 19);
         vrchatLogWatcher.emit('data', file, [time, 'left-room']);
         return true;
@@ -95,16 +95,16 @@ function parseLogOnPlayerJoinedOrLeft(file, line, offset) {
     // 2021.02.28 23:43:09 Log        -  [Behaviour] OnLeftRoom
     // 2021.02.28 23:43:09 Log        -  [Behaviour] Unregistering pypy
 
-    var c = line[offset];
+    var firstLetter = line[offset];
 
-    if (c === 'O') {
-        if (line.substr(offset, 15) === 'OnPlayerJoined ') {
+    if (firstLetter === 'O') {
+        if (line.startsWith('OnPlayerJoined ', offset) === true) {
             var user = line.substr(offset + 15);
             var time = line.substr(0, 19);
             vrchatLogWatcher.emit('data', file, [time, 'player-joined', user]);
             return true;
         }
-        if (line.substr(offset, 13) === 'OnPlayerLeft ') {
+        if (line.startsWith('OnPlayerLeft ', offset) === true) {
             var user = line.substr(offset + 13);
             var time = line.substr(0, 19);
             vrchatLogWatcher.emit('data', file, [time, 'player-left', user]);
@@ -118,9 +118,9 @@ function parseLogOnPlayerJoinedOrLeft(file, line, offset) {
 function parseLogVideoPlayback(file, line, offset) {
     // 2021.02.28 22:22:23 Log        -  [Video Playback] Attempting to resolve URL 'https://youtu.be/SHIL6F4fz_Y'
 
-    var c = line[offset];
+    var firstLetter = line[offset];
 
-    if (c === 'A' && line.substr(offset, 26) === 'Attempting to resolve URL ') {
+    if (firstLetter === 'A' && line.startsWith('Attempting to resolve URL ', offset) === true) {
         var url = line.substr(offset + 26);
         if (url.startsWith("'") === true && url.endsWith("'") === true) {
             url = url.substr(1, url.length - 2);
@@ -136,9 +136,9 @@ function parseLogVideoPlayback(file, line, offset) {
 function parseLogNotification(file, line, offset) {
     // 2021.01.03 05:48:58 Log        -  Received Notification: < Notification from username:pypy, sender user id:usr_4f76a584-9d4b-46f6-8209-8305eb683661 to of type: friendRequest, id: not_3a8f66eb-613c-4351-bee3-9980e6b5652c, created at: 01/14/2021 15:38:40 UTC, details: {{}}, type:friendRequest, m seen:False, message: ""> received at 01/02/2021 16:48:58 UTC
 
-    var c = line[offset];
+    var firstLetter = line[offset];
 
-    if (c === 'R' && line.substr(offset, 24) === 'Received Notification: <') {
+    if (firstLetter === 'R' && line.startsWith('Received Notification: <', offset) === true) {
         var pos = line.lastIndexOf('> received at ');
         if (pos < 0) {
             return false;
