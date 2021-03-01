@@ -11,7 +11,7 @@ class VRChatLogRepository {
     }
 
     reset() {
-        ipcRenderer.send('vrchat-log-watcher', 'reset');
+        ipcRenderer.send('vrchat-log-watcher:reset');
     }
 
     onReset() {

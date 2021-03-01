@@ -318,25 +318,19 @@ class VRChatLogWatcher extends EventEmitter {
 
 vrchatLogWatcher = new VRChatLogWatcher();
 
-ipcMain.on('vrchat-log-watcher', function (event, command) {
+ipcMain.on('vrchat-log-watcher:start', function (event) {
     event.returnValue = null;
+    vrchatLogWatcher.start();
+});
 
-    switch (command) {
-        case 'start':
-            vrchatLogWatcher.start();
-            break;
+ipcMain.on('vrchat-log-watcher:stop', function (event) {
+    event.returnValue = null;
+    vrchatLogWatcher.stop();
+});
 
-        case 'stop':
-            vrchatLogWatcher.stop();
-            break;
-
-        case 'reset':
-            vrchatLogWatcher.reset();
-            break;
-
-        default:
-            break;
-    }
+ipcMain.on('vrchat-log-watcher:reset', function (event) {
+    event.returnValue = null;
+    vrchatLogWatcher.reset();
 });
 
 module.exports = vrchatLogWatcher;
