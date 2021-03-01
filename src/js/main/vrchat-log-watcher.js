@@ -22,18 +22,29 @@ function parseLogAuth(file, line, offset) {
 
     var firstLetter = line[offset];
 
-    if (firstLetter === 'C' && line.startsWith('Client invoked disconnect', offset) === true) {
-        var time = line.substr(0, 19);
-        vrchatLogWatcher.emit('data', file, [time, 'disconnect']);
-        return true;
+    switch (firstLetter) {
+        case 'C':
+            if (line.startsWith('Client invoked disconnect', offset) === true) {
+                var time = line.substr(0, 19);
+                vrchatLogWatcher.emit('data', file, [time, 'disconnect']);
+                return true;
+            }
+            break;
+
+        case 'V':
+            if (line.startsWith('VRChat Build: ', offset) === true) {
+                var data = line.substr(offset);
+                var time = line.substr(0, 19);
+                vrchatLogWatcher.emit('data', file, [time, 'launch', data]);
+                return true;
+            }
+            break;
+
+        default:
+            break;
     }
 
-    if (firstLetter === 'V' && line.startsWith('VRChat Build: ', offset) === true) {
-        var data = line.substr(offset);
-        var time = line.substr(0, 19);
-        vrchatLogWatcher.emit('data', file, [time, 'launch', data]);
-        return true;
-    }
+    return false;
 }
 
 function parseLogLocation(file, line, offset) {
@@ -52,31 +63,44 @@ function parseLogLocation(file, line, offset) {
 
     var firstLetter = line[offset];
 
-    if (firstLetter === 'D' && line.startsWith('Destination set: ', offset) === true) {
-        var location = line.substr(offset + 17);
-        var time = line.substr(0, 19);
-        vrchatLogWatcher.emit('data', file, [time, 'destination', location]);
-        return true;
-    }
+    switch (firstLetter) {
+        case 'D':
+            if (line.startsWith('Destination set: ', offset) === true) {
+                var location = line.substr(offset + 17);
+                var time = line.substr(0, 19);
+                vrchatLogWatcher.emit('data', file, [time, 'destination', location]);
+                return true;
+            }
+            break;
 
-    if (firstLetter === 'E' && line.startsWith('Entering Room: ', offset) === true) {
-        var world = line.substr(offset + 15);
-        var time = line.substr(0, 19);
-        vrchatLogWatcher.emit('data', file, [time, 'entering-room', world]);
-        return true;
-    }
+        case 'E':
+            if (line.startsWith('Entering Room: ', offset) === true) {
+                var world = line.substr(offset + 15);
+                var time = line.substr(0, 19);
+                vrchatLogWatcher.emit('data', file, [time, 'entering-room', world]);
+                return true;
+            }
+            break;
 
-    if (firstLetter === 'J' && line.startsWith('Joining wrld_', offset) === true) {
-        var location = line.substr(offset + 8);
-        var time = line.substr(0, 19);
-        vrchatLogWatcher.emit('data', file, [time, 'joining-room', location]);
-        return true;
-    }
+        case 'J':
+            if (line.startsWith('Joining wrld_', offset) === true) {
+                var location = line.substr(offset + 8);
+                var time = line.substr(0, 19);
+                vrchatLogWatcher.emit('data', file, [time, 'joining-room', location]);
+                return true;
+            }
+            break;
 
-    if (firstLetter === 'O' && line.startsWith('OnLeftRoom', offset) === true) {
-        var time = line.substr(0, 19);
-        vrchatLogWatcher.emit('data', file, [time, 'left-room']);
-        return true;
+        case 'O':
+            if (line.startsWith('OnLeftRoom', offset) === true) {
+                var time = line.substr(0, 19);
+                vrchatLogWatcher.emit('data', file, [time, 'left-room']);
+                return true;
+            }
+            break;
+
+        default:
+            break;
     }
 
     return false;
