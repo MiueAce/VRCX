@@ -169,6 +169,7 @@ function parseLog(file, line) {
     }
 
     offset += 2;
+
     if (
         parseLogOnPlayerJoinedOrLeft(file, line, offset) === true ||
         parseLogLocation(file, line, offset) === true ||
