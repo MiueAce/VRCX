@@ -1,15 +1,15 @@
 <template lang="pug">
-UIWindowTitleBar
+UIWindowTitleBar(:vrchatClient="vrchatClient")
 #app-content
-    UILogin(v-show="isLoggedIn === false")
-    div(v-show="isLoggedIn === true")
+    UILogin(:vrchatClient="vrchatClient" v-show="vrchatClient.isLoggedIn.value === false")
+    div(v-show="vrchatClient.isLoggedIn.value === true")
         div logged in yo
 </template>
 
 <script>
-const { onMounted } = require('vue');
+const { ref, onMounted } = require('vue');
 const eventEmitter = require('../js/renderer/event-emitter.js');
-const vrchatApi = require('../js/renderer/vrchat-api.js');
+const VRChatClient = require('../js/renderer/vrchat-client.js');
 const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
 
 import UIWindowTitleBar from './ui-window-title-bar.vue';
@@ -21,6 +21,8 @@ export default {
         UILogin,
     },
     setup() {
+        const vrchatClient = new VRChatClient();
+
         onMounted(function () {
             setTimeout(function () {
                 vrchatLogRepository.reset();
@@ -52,7 +54,7 @@ export default {
         });
 
         return {
-            isLoggedIn: vrchatApi.isLoggedIn,
+            vrchatClient,
         };
     },
 };
