@@ -1,5 +1,13 @@
 @import 'base.scss';
 
+.el-notification {
+    &__content {
+        margin-top: 3px !important;
+        line-height: inherit;
+        text-align: inherit;
+    }
+}
+
 #app {
     display: flex;
     flex-direction: column;
