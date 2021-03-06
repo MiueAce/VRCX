@@ -7,6 +7,7 @@ UIWindowTitleBar
 </template>
 
 <script>
+const { onMounted } = require('vue');
 const vrchatApi = require('../js/renderer/vrchat-api.js');
 const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
 
@@ -19,9 +20,11 @@ export default {
         UILogin,
     },
     setup() {
-        setTimeout(function () {
-            vrchatLogRepository.reset();
-        }, 1);
+        onMounted(function () {
+            setTimeout(function () {
+                vrchatLogRepository.reset();
+            }, 1);
+        });
 
         vrchatApi.on('current-user', console.log);
 
