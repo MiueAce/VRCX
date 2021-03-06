@@ -16,14 +16,13 @@
 
 <script>
 const { ipcRenderer } = window;
+const vrchatClient = require('../js/renderer/vrchat-client.js');
 const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
 
 export default {
-    props: ['vrchatClient'],
-    setup(props) {
-        var { vrchatClient } = props;
-
+    setup() {
         return {
+            vrchatClient,
             vrchatLogRepository,
             close() {
                 ipcRenderer.send('main-window:close');

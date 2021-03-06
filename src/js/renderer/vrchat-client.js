@@ -1,10 +1,11 @@
 const { ref } = require('vue');
-const VRChatApi = require('./vrchat-api.js');
+const vrchatApi = require('./vrchat-api.js');
+
+/** @type {?VRChatClient} */
+var vrchatClient = null;
 
 class VRChatClient {
     constructor() {
-        this.api = new VRChatApi();
-
         this.isLoggedIn = ref(false);
 
         this.remoteConfig = ref(null);
@@ -63,8 +64,9 @@ class VRChatClient {
         this.isUpdatingCurrentUser = true;
 
         try {
+            // official 180s
             if (Date.now() - this.currentUserUpdateTime >= 30 * 1000) {
-                var json = await this.getCurrentUser();
+                var json = await this.loadCurrentUser();
                 this.currentUserUpdateTime = Date.now();
                 console.log('vrchat-client:current-user', json);
             }
@@ -76,10 +78,10 @@ class VRChatClient {
     }
 
     async getConfig() {
-        var json = await this.api.getConfig();
+        var json = await vrchatApi.getConfig();
 
         this.remoteConfig.value = json;
-        this.api.apiKey = json.clientApiKey;
+        vrchatApi.apiKey = json.clientApiKey;
 
         return json;
     }
@@ -89,7 +91,7 @@ class VRChatClient {
      * @param {string} password
      */
     async login(username, password) {
-        var json = await this.api.login(username, password);
+        var json = await vrchatApi.login(username, password);
 
         // {"error":{"message":"\"Invalid Username or Password\"","status_code":401}}
         // {"requiresTwoFactorAuth":["totp","otp"]}
@@ -110,7 +112,7 @@ class VRChatClient {
     }
 
     async logout() {
-        var json = await this.api.logout();
+        var json = await vrchatApi.logout();
 
         // {"error":{"message":"\"Missing Credentials\"","status_code":401}}
         // {"success":{"message":"Ok!","status_code":200}}
@@ -126,15 +128,15 @@ class VRChatClient {
      * @param {object} data { code: string }
      */
     async verifyTwoFactorAuth(type, data) {
-        var json = await this.api.verifyTwoFactorAuth(type, data);
+        var json = await vrchatApi.verifyTwoFactorAuth(type, data);
 
         // {"verified": true}
 
         return json;
     }
 
-    async getCurrentUser() {
-        var json = await this.api.getCurrentUser();
+    async loadCurrentUser() {
+        var json = await vrchatApi.loadCurrentUser();
 
         // {"error":{"message":"\"Missing Credentials\"","status_code":401}}
 
@@ -179,7 +181,7 @@ class VRChatClient {
             return;
         }
 
-        var { token } = await this.api.getAuth();
+        var { token } = await vrchatApi.getAuth();
         if (typeof token !== 'string') {
             return;
         }
@@ -219,8 +221,42 @@ class VRChatClient {
                 }
                 var { data } = event;
                 var json = JSON.parse(data);
-                json.content = JSON.parse(json.content);
                 console.log('PIPELINE', json);
+                switch (json.type) {
+                    case 'notification':
+                        console.log('notification', JSON.parse(json.content));
+                        break;
+                    case 'friend-add':
+                        console.log('friend-add', JSON.parse(json.content));
+                        break;
+                    case 'friend-delete':
+                        console.log('friend-delete', JSON.parse(json.content));
+                        break;
+                    case 'friend-online':
+                        console.log('friend-online', JSON.parse(json.content));
+                        break;
+                    case 'friend-active':
+                        console.log('friend-active', JSON.parse(json.content));
+                        break;
+                    case 'friend-offline':
+                        console.log('friend-offline', JSON.parse(json.content));
+                        break;
+                    case 'friend-update':
+                        console.log('friend-update', JSON.parse(json.content));
+                        break;
+                    case 'friend-location':
+                        console.log('friend-location', JSON.parse(json.content));
+                        break;
+                    case 'user-update':
+                        console.log('user-update', JSON.parse(json.content));
+                        break;
+                    case 'user-location':
+                        console.log('user-location', JSON.parse(json.content));
+                        break;
+                    default:
+                        console.log('unknown socket event type');
+                        break;
+                }
             } catch (err) {
                 console.error(err);
             }
@@ -230,4 +266,5 @@ class VRChatClient {
     }
 }
 
-module.exports = VRChatClient;
+vrchatClient = new VRChatClient();
+module.exports = vrchatClient;

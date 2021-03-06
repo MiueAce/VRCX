@@ -15,11 +15,10 @@
 
 <script>
 const { ref, onMounted, onUnmounted } = require('vue');
+const vrchatClient = require('../js/renderer/vrchat-client.js');
 
 export default {
-    props: ['vrchatClient'],
-    setup(props) {
-        var { vrchatClient } = props;
+    setup() {
         var isLoading = ref(false);
         var username = ref('');
         var password = ref('');
@@ -37,7 +36,7 @@ export default {
                 if (username.value.length > 0 && password.value.length > 0) {
                     json = await vrchatClient.login(username.value, password.value);
                 } else {
-                    json = await vrchatClient.getCurrentUser();
+                    json = await vrchatClient.loadCurrentUser();
                 }
                 if ('requiresTwoFactorAuth' in json) {
                 }

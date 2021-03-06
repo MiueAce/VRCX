@@ -1,15 +1,16 @@
 <template lang="pug">
-UIWindowTitleBar(:vrchatClient="vrchatClient")
+UIWindowTitleBar()
 #app-content
-    UILogin(:vrchatClient="vrchatClient" v-show="vrchatClient.isLoggedIn.value === false")
+    UILogin(v-show="vrchatClient.isLoggedIn.value === false")
     div(v-show="vrchatClient.isLoggedIn.value === true")
-        div logged in yo
+        div yo
 </template>
 
 <script>
 const { ref, onMounted, onUnmounted } = require('vue');
+const { ElNotification } = require('element-plus');
 const { eventBus } = require('../js/renderer/event-bus.js');
-const VRChatClient = require('../js/renderer/vrchat-client.js');
+const vrchatClient = require('../js/renderer/vrchat-client.js');
 const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
 
 import UIWindowTitleBar from './ui-window-title-bar.vue';
@@ -21,8 +22,6 @@ export default {
         UILogin,
     },
     setup() {
-        var vrchatClient = new VRChatClient();
-
         onMounted(function () {
             setTimeout(function () {
                 vrchatLogRepository.reset();
@@ -31,6 +30,13 @@ export default {
 
         onUnmounted(function () {
             vrchatClient.dispose();
+        });
+
+        eventBus.on('vrchat-api:error', function ({ status, message }) {
+            ElNotification({
+                type: 'error',
+                message: `code ${status}, ${message}`,
+            });
         });
 
         // eventBus.on('vrchat-log:launch', function () {
@@ -57,6 +63,9 @@ export default {
 
         return {
             vrchatClient,
+            resetVRChatLog() {
+                vrchatLogRepository.reset();
+            },
         };
     },
 };
