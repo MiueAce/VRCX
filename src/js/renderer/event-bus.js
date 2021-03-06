@@ -52,4 +52,4 @@ class EventBus {
 }
 
 eventBus = new EventBus();
-module.exports = eventBus;
+module.exports = { EventBus, eventBus };

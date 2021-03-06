@@ -1,6 +1,6 @@
 const { ipcRenderer } = window;
 const { ref } = require('vue');
-const eventBus = require('./event-bus.js');
+const { eventBus } = require('./event-bus.js');
 
 /** @type {?VRChatLogRepository} */
 var vrchatLogRepository = null;
