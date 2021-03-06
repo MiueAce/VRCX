@@ -17,11 +17,11 @@ mix.override(function (webpackConfig) {
         test: /\.pug$/,
         oneOf: [
             {
-                resourceQuery: /^\?vue/,
-                use: ['pug-plain-loader'],
+                exclude: /\.vue$/,
+                use: ['raw-loader', 'pug-plain-loader'],
             },
             {
-                use: 'pug-loader',
+                use: 'pug-plain-loader',
             },
         ],
     });
