@@ -42,9 +42,6 @@ class VRChatApi {
         return data;
     }
 
-    /**
-     * @returns {object}
-     */
     async getConfig() {
         var json = await this.call(
             {
@@ -61,7 +58,6 @@ class VRChatApi {
     /**
      * @param {string} username
      * @param {string} password
-     * @returns {object}
      */
     async login(username, password) {
         var json = await this.call({
@@ -89,9 +85,6 @@ class VRChatApi {
         return json;
     }
 
-    /**
-     * @returns {object}
-     */
     async logout() {
         var json = await this.call({
             method: 'put',
@@ -109,7 +102,6 @@ class VRChatApi {
     /**
      * @param {string} type 'otp'|'totp'
      * @param {object} data { code: string }
-     * @returns {object}
      */
     async verifyTwoFactorAuth(type, data) {
         var json = await this.call({
