@@ -56,8 +56,11 @@ class MainWindow extends EventEmitter {
             frame: false,
             webPreferences: {
                 preload: path.join(app.getAppPath(), 'assets/preload.js'),
-                // partition: 'persist:vrcx',
+                sandbox: true,
                 defaultEncoding: 'utf-8',
+                contextIsolation: false,
+                disableDialogs: true,
+                autoplayPolicy: 'no-user-gesture-required',
                 spellcheck: false,
             },
         });
