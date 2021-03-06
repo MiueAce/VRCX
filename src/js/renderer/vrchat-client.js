@@ -7,7 +7,6 @@ class VRChatClient {
         this.isLoggedIn = ref(false);
         this.config = ref(null);
         this.currentUser = ref(null);
-        console.log(this.isLoggedIn);
     }
 
     async getConfig() {
