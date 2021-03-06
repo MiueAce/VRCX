@@ -1,7 +1,7 @@
-/** @type {?EventEmitter} */
-var eventEmitter = null;
+/** @type {?EventBus} */
+var eventBus = null;
 
-class EventEmitter {
+class EventBus {
     constructor() {
         this.events = {};
     }
@@ -51,5 +51,5 @@ class EventEmitter {
     }
 }
 
-eventEmitter = new EventEmitter();
-module.exports = eventEmitter;
+eventBus = new EventBus();
+module.exports = eventBus;

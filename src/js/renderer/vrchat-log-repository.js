@@ -1,6 +1,6 @@
 const { ipcRenderer } = window;
 const { ref } = require('vue');
-const eventEmitter = require('./event-emitter.js');
+const eventBus = require('./event-bus.js');
 
 /** @type {?VRChatLogRepository} */
 var vrchatLogRepository = null;
@@ -50,21 +50,21 @@ class VRChatLogRepository {
                 context.user = null;
                 context.world = null;
                 context.location = null;
-                eventEmitter.emit('vrchat-log:launch', { time });
+                eventBus.emit('vrchat-log:launch', { time });
                 break;
 
             case 'disconnect':
                 context.user = null;
                 context.world = null;
                 context.location = null;
-                eventEmitter.emit('vrchat-log:disconnect', { time });
+                eventBus.emit('vrchat-log:disconnect', { time });
                 break;
 
             case 'destination':
                 var location = data[2];
                 var { user } = context;
                 context.destination = location;
-                eventEmitter.emit('vrchat-log:destination', { time, user, location });
+                eventBus.emit('vrchat-log:destination', { time, user, location });
                 break;
 
             case 'entering-room':
@@ -76,14 +76,14 @@ class VRChatLogRepository {
                 var location = data[2];
                 var { user, world } = context;
                 context.location = location;
-                eventEmitter.emit('vrchat-log:joining-room', { time, user, world, location });
+                eventBus.emit('vrchat-log:joining-room', { time, user, world, location });
                 break;
 
             case 'left-room':
                 context.world = null;
                 context.location = null;
                 context.destination = null;
-                eventEmitter.emit('vrchat-log:left-room', { time, user, world, location });
+                eventBus.emit('vrchat-log:left-room', { time, user, world, location });
                 break;
 
             case 'player-joined':
@@ -92,13 +92,13 @@ class VRChatLogRepository {
                     context.user = user;
                 }
                 var { world, location } = context;
-                eventEmitter.emit('vrchat-log:player-joined', { time, user, world, location });
+                eventBus.emit('vrchat-log:player-joined', { time, user, world, location });
                 break;
 
             case 'player-left':
                 var user = data[2];
                 var { world, location } = context;
-                eventEmitter.emit('vrchat-log:player-left', { time, user, world, location });
+                eventBus.emit('vrchat-log:player-left', { time, user, world, location });
                 break;
         }
 

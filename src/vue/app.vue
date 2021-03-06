@@ -8,7 +8,7 @@ UIWindowTitleBar(:vrchatClient="vrchatClient")
 
 <script>
 const { ref, onMounted } = require('vue');
-const eventEmitter = require('../js/renderer/event-emitter.js');
+const eventBus = require('../js/renderer/event-bus.js');
 const VRChatClient = require('../js/renderer/vrchat-client.js');
 const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
 
@@ -29,27 +29,27 @@ export default {
             }, 1);
         });
 
-        eventEmitter.on('vrchat-api:current-user', console.log);
+        eventBus.on('vrchat-api:current-user', console.log);
 
-        eventEmitter.on('vrchat-log:launch', function () {
+        eventBus.on('vrchat-log:launch', function () {
             console.log('launch');
         });
-        eventEmitter.on('vrchat-log:disconnect', function () {
+        eventBus.on('vrchat-log:disconnect', function () {
             console.log('disconnect');
         });
-        eventEmitter.on('vrchat-log:destination', function (data) {
+        eventBus.on('vrchat-log:destination', function (data) {
             console.log('destination', data);
         });
-        eventEmitter.on('vrchat-log:joining-room', function (data) {
+        eventBus.on('vrchat-log:joining-room', function (data) {
             console.log('joining-room', data);
         });
-        eventEmitter.on('vrchat-log:left-room', function (data) {
+        eventBus.on('vrchat-log:left-room', function (data) {
             console.log('left-room', data);
         });
-        eventEmitter.on('vrchat-log:player-joined', function (data) {
+        eventBus.on('vrchat-log:player-joined', function (data) {
             console.log('player-joined', data);
         });
-        eventEmitter.on('vrchat-log:player-left', function (data) {
+        eventBus.on('vrchat-log:player-left', function (data) {
             console.log('player-left', data);
         });
 
