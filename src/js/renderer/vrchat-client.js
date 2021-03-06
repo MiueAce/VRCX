@@ -126,13 +126,13 @@ class VRChatClient {
             return;
         }
 
-        var vrchatClient = this;
+        var self = this;
         var webSocket = new WebSocket(url);
 
         webSocket.onerror = function (event) {
             console.log('websocket error', event);
-            if (vrchatClient.webSocket === this) {
-                vrchatClient.webSocket = null;
+            if (self.webSocket === this) {
+                self.webSocket = null;
             }
             try {
                 this.close();
@@ -143,13 +143,13 @@ class VRChatClient {
 
         webSocket.onclose = function (event) {
             console.log('websocket close', event);
-            if (vrchatClient.webSocket === this) {
-                vrchatClient.webSocket = null;
+            if (self.webSocket === this) {
+                self.webSocket = null;
             }
         };
 
         webSocket.onmessage = function (event) {
-            if (vrchatClient.webSocket !== this) {
+            if (self.webSocket !== this) {
                 return;
             }
             var { data } = event;
