@@ -1,13 +1,12 @@
 const { ref, reactive } = require('vue');
 const axios = require('axios');
-const EventEmitter = require('./event-emitter.js');
+const eventEmitter = require('./event-emitter.js');
 
 /** @type {?VRChatApi} */
 var vrchatApi = null;
 
-class VRChatApi extends EventEmitter {
+class VRChatApi {
     constructor() {
-        super();
         this.isLoggedIn = ref(false);
         this.config = ref(null);
         this.currentUser = ref(null);
@@ -155,7 +154,7 @@ vrchatApi = new VRChatApi();
             if (vrchatApi.isLoggedIn.value === true && Date.now() - lastUpdateTime >= 30 * 1000) {
                 await vrchatApi.getCurrentUser();
                 lastUpdateTime = Date.now();
-                vrchatApi.emit('current-user', vrchatApi.currentUser.value);
+                eventEmitter.emit('vrchat-api:current-user', vrchatApi.currentUser.value);
             }
         } catch (err) {
             console.error(err);

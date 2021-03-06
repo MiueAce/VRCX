@@ -8,6 +8,7 @@ UIWindowTitleBar
 
 <script>
 const { onMounted } = require('vue');
+const eventEmitter = require('../js/renderer/event-emitter.js');
 const vrchatApi = require('../js/renderer/vrchat-api.js');
 const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
 
@@ -26,7 +27,29 @@ export default {
             }, 1);
         });
 
-        vrchatApi.on('current-user', console.log);
+        eventEmitter.on('vrchat-api:current-user', console.log);
+
+        eventEmitter.on('vrchat-log:launch', function () {
+            console.log('launch');
+        });
+        eventEmitter.on('vrchat-log:disconnect', function () {
+            console.log('disconnect');
+        });
+        eventEmitter.on('vrchat-log:destination', function (data) {
+            console.log('destination', data);
+        });
+        eventEmitter.on('vrchat-log:joining-room', function (data) {
+            console.log('destination', data);
+        });
+        eventEmitter.on('vrchat-log:left-room', function (data) {
+            console.log('destination', data);
+        });
+        eventEmitter.on('vrchat-log:player-joined', function (data) {
+            console.log('destination', data);
+        });
+        eventEmitter.on('vrchat-log:player-left', function (data) {
+            console.log('destination', data);
+        });
 
         return {
             isLoggedIn: vrchatApi.isLoggedIn,
