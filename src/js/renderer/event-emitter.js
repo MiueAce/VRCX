@@ -24,12 +24,12 @@ class EventEmitter {
         }
 
         var handlers = this.events[event];
-        if (typeof handlers !== 'undefined') {
-            handlers.push(handler);
+        if (typeof handlers === 'undefined') {
+            this.events[event] = [handler];
             return;
         }
 
-        this.events[event] = [handler];
+        handlers.push(handler);
     }
 
     off(event, handler) {
