@@ -7,6 +7,7 @@ class VRChatClient {
         this.isLoggedIn = ref(false);
         this.config = ref(null);
         this.currentUser = ref(null);
+        this.webSocket = null;
     }
 
     async getConfig() {
@@ -39,6 +40,10 @@ class VRChatClient {
         this.isLoggedIn.value = true;
         this.currentUser.value = json;
 
+        if (this.webSocket === null) {
+            this.connectWebSocket();
+        }
+
         return json;
     }
 
@@ -49,6 +54,7 @@ class VRChatClient {
         // {"success":{"message":"Ok!","status_code":200}}
 
         this.isLoggedIn.value = false;
+        this.closeWebSocket();
 
         return json;
     }
@@ -87,7 +93,76 @@ class VRChatClient {
         this.isLoggedIn.value = true;
         this.currentUser.value = json;
 
+        if (this.webSocket === null) {
+            this.connectWebSocket();
+        }
+
         return json;
+    }
+
+    closeWebSocket() {
+        var { webSocket } = this;
+        if (webSocket === null) {
+            return;
+        }
+
+        this.webSocket = null;
+
+        try {
+            webSocket.close();
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async connectWebSocket() {
+        var { token } = await this.api.getAuth();
+        if (typeof token !== 'string') {
+            return;
+        }
+
+        var url = `wss://pipeline.vrchat.cloud/?auth=${token}`;
+        if (this.webSocket !== null) {
+            return;
+        }
+
+        var vrchatClient = this;
+        var webSocket = new WebSocket(url);
+
+        webSocket.onerror = function (event) {
+            console.log('websocket error', event);
+            if (vrchatClient.webSocket === this) {
+                vrchatClient.webSocket = null;
+            }
+            try {
+                this.close();
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        webSocket.onclose = function (event) {
+            console.log('websocket close', event);
+            if (vrchatClient.webSocket === this) {
+                vrchatClient.webSocket = null;
+            }
+        };
+
+        webSocket.onmessage = function (event) {
+            if (vrchatClient.webSocket !== this) {
+                return;
+            }
+            var { data } = event;
+            try {
+                var json = JSON.parse(data);
+                json.content = JSON.parse(json.content);
+                console.log('PIPELINE', json);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        this.webSocket = webSocket;
     }
 }
 

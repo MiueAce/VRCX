@@ -72,6 +72,12 @@ class VRChatApi {
         });
     }
 
+    async getAuth() {
+        return await this.call({
+            url: 'auth',
+        });
+    }
+
     async getCurrentUser() {
         return await this.call({
             url: 'auth/user',
