@@ -29,27 +29,27 @@ export default {
             }, 1);
         });
 
-        eventBus.on('vrchat-log:launch', function () {
-            console.log('launch');
-        });
-        eventBus.on('vrchat-log:disconnect', function () {
-            console.log('disconnect');
-        });
-        eventBus.on('vrchat-log:destination', function (data) {
-            console.log('destination', data);
-        });
-        eventBus.on('vrchat-log:joining-room', function (data) {
-            console.log('joining-room', data);
-        });
-        eventBus.on('vrchat-log:left-room', function (data) {
-            console.log('left-room', data);
-        });
-        eventBus.on('vrchat-log:player-joined', function (data) {
-            console.log('player-joined', data);
-        });
-        eventBus.on('vrchat-log:player-left', function (data) {
-            console.log('player-left', data);
-        });
+        // eventBus.on('vrchat-log:launch', function () {
+        //     console.log('launch');
+        // });
+        // eventBus.on('vrchat-log:disconnect', function () {
+        //     console.log('disconnect');
+        // });
+        // eventBus.on('vrchat-log:destination', function (data) {
+        //     console.log('destination', data);
+        // });
+        // eventBus.on('vrchat-log:joining-room', function (data) {
+        //     console.log('joining-room', data);
+        // });
+        // eventBus.on('vrchat-log:left-room', function (data) {
+        //     console.log('left-room', data);
+        // });
+        // eventBus.on('vrchat-log:player-joined', function (data) {
+        //     console.log('player-joined', data);
+        // });
+        // eventBus.on('vrchat-log:player-left', function (data) {
+        //     console.log('player-left', data);
+        // });
 
         return {
             vrchatClient,
