@@ -39,16 +39,16 @@ export default {
             console.log('destination', data);
         });
         eventEmitter.on('vrchat-log:joining-room', function (data) {
-            console.log('destination', data);
+            console.log('joining-room', data);
         });
         eventEmitter.on('vrchat-log:left-room', function (data) {
-            console.log('destination', data);
+            console.log('left-room', data);
         });
         eventEmitter.on('vrchat-log:player-joined', function (data) {
-            console.log('destination', data);
+            console.log('player-joined', data);
         });
         eventEmitter.on('vrchat-log:player-left', function (data) {
-            console.log('destination', data);
+            console.log('player-left', data);
         });
 
         return {
