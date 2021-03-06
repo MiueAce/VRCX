@@ -11,20 +11,19 @@
     #app-debug(style="-webkit-app-region: no-drag;position:absolute;right:150px;top:0;color:#888;")
         el-button(type="primary" size="mini" native-type="button" @click="onLogout" v-show="vrchatClient.isLoggedIn.value === true")
             | {{ $t('login.logout')}}
-        | logCount={{ logCount }}
+        | logCount={{ vrchatLogRepository.logCount.value }}
 </template>
 
 <script>
 const { ipcRenderer } = window;
-const { logCount } = require('../js/renderer/vrchat-log-repository.js');
+const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
 
 export default {
     props: ['vrchatClient'],
     setup(props) {
         const { vrchatClient } = props;
-        console.log({ vrchatClient });
         return {
-            logCount,
+            vrchatLogRepository,
             close() {
                 ipcRenderer.send('main-window:close');
             },
