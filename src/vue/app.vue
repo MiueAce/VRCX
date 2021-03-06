@@ -7,7 +7,7 @@ UIWindowTitleBar(:vrchatClient="vrchatClient")
 </template>
 
 <script>
-const { ref, onMounted } = require('vue');
+const { ref, onMounted, onUnmounted } = require('vue');
 const { eventBus } = require('../js/renderer/event-bus.js');
 const VRChatClient = require('../js/renderer/vrchat-client.js');
 const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
@@ -27,6 +27,10 @@ export default {
             setTimeout(function () {
                 vrchatLogRepository.reset();
             }, 1);
+        });
+
+        onUnmounted(function () {
+            vrchatClient.dispose();
         });
 
         // eventBus.on('vrchat-log:launch', function () {

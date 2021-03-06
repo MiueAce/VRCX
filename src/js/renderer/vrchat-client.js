@@ -4,10 +4,58 @@ const VRChatApi = require('./vrchat-api.js');
 class VRChatClient {
     constructor() {
         this.api = new VRChatApi();
+        this.webSocket = null;
         this.isLoggedIn = ref(false);
         this.config = ref(null);
         this.currentUser = ref(null);
-        this.webSocket = null;
+        this.currentUserUpdateTime = 0;
+        this.isUpdatingCurrentUser = false;
+        this.pollTimer = setTimeout(() => this.poll(), 1);
+    }
+
+    async pollCurrentUser() {
+        if (this.pollCurrentUserTimer !== null) {
+            return;
+        }
+
+        this.pollCurrentUserTimer = setTimeout(() => this.pollCurrentUser(), 5000);
+    }
+
+    dispose() {
+        var { pollTimer } = this;
+        if (pollTimer !== null) {
+            this.pollTimer = null;
+            clearTimeout(pollTimer);
+        }
+    }
+
+    poll() {
+        try {
+            this.updateCurrentUser();
+        } catch (err) {
+            console.error(err);
+        }
+        this.pollTimer = setTimeout(() => this.poll(), 1000);
+    }
+
+    async updateCurrentUser() {
+        if (this.isLoggedIn.value === false || this.isUpdatingCurrentUser === true) {
+            return;
+        }
+
+        this.isUpdatingCurrentUser = true;
+
+        try {
+            if (Date.now() - this.currentUserUpdateTime >= 30 * 1000) {
+                var json = await this.getCurrentUser();
+                this.currentUserUpdateTime = Date.now();
+                console.log('vrchat-client:current-user', json);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+
+        this.isUpdatingCurrentUser = false;
     }
 
     async getConfig() {
@@ -39,6 +87,7 @@ class VRChatClient {
 
         this.isLoggedIn.value = true;
         this.currentUser.value = json;
+        this.currentUserUpdateTime = Date.now();
 
         if (this.webSocket === null) {
             this.connectWebSocket();
@@ -92,6 +141,7 @@ class VRChatClient {
 
         this.isLoggedIn.value = true;
         this.currentUser.value = json;
+        this.currentUserUpdateTime = Date.now();
 
         if (this.webSocket === null) {
             this.connectWebSocket();
@@ -165,21 +215,5 @@ class VRChatClient {
         this.webSocket = webSocket;
     }
 }
-
-// (function () {
-//     var lastUpdateTime = 0;
-//     (async function updateCurrentUser() {
-//         try {
-//             if (vrchatApi.isLoggedIn.value === true && Date.now() - lastUpdateTime >= 30 * 1000) {
-//                 await vrchatApi.getCurrentUser();
-//                 lastUpdateTime = Date.now();
-//                 eventEmitter.emit('vrchat-api:current-user', vrchatApi.currentUser.value);
-//             }
-//         } catch (err) {
-//             console.error(err);
-//         }
-//         setTimeout(updateCurrentUser, 5000);
-//     })();
-// })();
 
 module.exports = VRChatClient;
