@@ -19,10 +19,10 @@ const { ref, onMounted } = require('vue');
 export default {
     props: ['vrchatClient'],
     setup(props) {
-        const { vrchatClient } = props;
-        const isLoading = ref(false);
-        const username = ref('');
-        const password = ref('');
+        var { vrchatClient } = props;
+        var isLoading = ref(false);
+        var username = ref('');
+        var password = ref('');
 
         onMounted(async function () {
             if (isLoading.value === true) {

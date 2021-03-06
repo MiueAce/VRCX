@@ -21,7 +21,8 @@ const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
 export default {
     props: ['vrchatClient'],
     setup(props) {
-        const { vrchatClient } = props;
+        var { vrchatClient } = props;
+
         return {
             vrchatLogRepository,
             close() {

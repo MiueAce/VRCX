@@ -21,7 +21,7 @@ export default {
         UILogin,
     },
     setup() {
-        const vrchatClient = new VRChatClient();
+        var vrchatClient = new VRChatClient();
 
         onMounted(function () {
             setTimeout(function () {
