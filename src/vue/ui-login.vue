@@ -14,7 +14,7 @@
 </template>
 
 <script>
-const { ref, onMounted } = require('vue');
+const { ref, onMounted, onUnmounted } = require('vue');
 
 export default {
     props: ['vrchatClient'],
@@ -24,17 +24,21 @@ export default {
         var username = ref('');
         var password = ref('');
 
-        onMounted(async function () {
+        async function onSubmitLogin() {
             if (isLoading.value === true) {
                 return;
             }
 
-            // TODO: check login
             isLoading.value = true;
 
             try {
                 await vrchatClient.getConfig();
-                var json = await vrchatClient.getCurrentUser();
+                var json = null;
+                if (username.value.length > 0 && password.value.length > 0) {
+                    json = await vrchatClient.login(username.value, password.value);
+                } else {
+                    json = await vrchatClient.getCurrentUser();
+                }
                 if ('requiresTwoFactorAuth' in json) {
                 }
             } catch (err) {
@@ -42,30 +46,17 @@ export default {
             }
 
             isLoading.value = false;
+        }
+
+        onMounted(function () {
+            onSubmitLogin();
         });
 
         return {
             isLoading,
             username,
             password,
-            async onSubmitLogin() {
-                if (isLoading.value === true) {
-                    return;
-                }
-
-                isLoading.value = true;
-
-                try {
-                    await vrchatClient.getConfig();
-                    var json = await vrchatClient.login(username.value, password.value);
-                    if ('requiresTwoFactorAuth' in json) {
-                    }
-                } catch (err) {
-                    console.error(err);
-                }
-
-                isLoading.value = false;
-            },
+            onSubmitLogin,
         };
     },
 };
