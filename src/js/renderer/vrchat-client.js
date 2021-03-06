@@ -4,21 +4,19 @@ const VRChatApi = require('./vrchat-api.js');
 class VRChatClient {
     constructor() {
         this.api = new VRChatApi();
-        this.webSocket = null;
+
         this.isLoggedIn = ref(false);
-        this.config = ref(null);
+
+        this.remoteConfig = ref(null);
+
+        this.webSocket = null;
+        this.isUpdatingWebSocket = false;
+
         this.currentUser = ref(null);
         this.currentUserUpdateTime = 0;
         this.isUpdatingCurrentUser = false;
+
         this.pollTimer = setTimeout(() => this.poll(), 1);
-    }
-
-    async pollCurrentUser() {
-        if (this.pollCurrentUserTimer !== null) {
-            return;
-        }
-
-        this.pollCurrentUserTimer = setTimeout(() => this.pollCurrentUser(), 5000);
     }
 
     dispose() {
@@ -33,9 +31,28 @@ class VRChatClient {
         this.pollTimer = setTimeout(() => this.poll(), 1000);
         try {
             this.updateCurrentUser();
+            this.updateWebSocket();
         } catch (err) {
             console.error(err);
         }
+    }
+
+    async updateWebSocket() {
+        if (this.isLoggedIn.value === false || this.isUpdatingWebSocket === true) {
+            return;
+        }
+
+        this.isUpdatingWebSocket = true;
+
+        try {
+            if (this.webSocket === null) {
+                // await this.connectWebSocket();
+            }
+        } catch (err) {
+            console.error(err);
+        }
+
+        this.isUpdatingWebSocket = false;
     }
 
     async updateCurrentUser() {
@@ -61,7 +78,7 @@ class VRChatClient {
     async getConfig() {
         var json = await this.api.getConfig();
 
-        this.config.value = json;
+        this.remoteConfig.value = json;
         this.api.apiKey = json.clientApiKey;
 
         return json;
@@ -88,10 +105,6 @@ class VRChatClient {
         this.isLoggedIn.value = true;
         this.currentUser.value = json;
         this.currentUserUpdateTime = Date.now();
-
-        if (this.webSocket === null) {
-            this.connectWebSocket();
-        }
 
         return json;
     }
@@ -143,10 +156,6 @@ class VRChatClient {
         this.currentUser.value = json;
         this.currentUserUpdateTime = Date.now();
 
-        if (this.webSocket === null) {
-            this.connectWebSocket();
-        }
-
         return json;
     }
 
@@ -166,6 +175,10 @@ class VRChatClient {
     }
 
     async connectWebSocket() {
+        if (this.webSocket !== null) {
+            return;
+        }
+
         var { token } = await this.api.getAuth();
         if (typeof token !== 'string') {
             return;
@@ -199,11 +212,12 @@ class VRChatClient {
         };
 
         webSocket.onmessage = function (event) {
-            if (self.webSocket !== this) {
-                return;
-            }
-            var { data } = event;
             try {
+                if (self.webSocket !== this) {
+                    this.close();
+                    return;
+                }
+                var { data } = event;
                 var json = JSON.parse(data);
                 json.content = JSON.parse(json.content);
                 console.log('PIPELINE', json);
