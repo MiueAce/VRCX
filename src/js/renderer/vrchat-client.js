@@ -30,11 +30,14 @@ class VRChatClient {
     }
 
     poll() {
+        this.pollTimer = null;
+
         try {
             this.updateCurrentUser();
         } catch (err) {
             console.error(err);
         }
+
         this.pollTimer = setTimeout(() => this.poll(), 1000);
     }
 
