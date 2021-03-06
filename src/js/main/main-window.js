@@ -113,19 +113,19 @@ class MainWindow extends EventEmitter {
         });
 
         webContents.on('new-window', function (event, url) {
-            console.log('new-window', event, url);
+            console.log('new-window', url);
             event.preventDefault();
 
             shell.openExternal(url);
         });
 
         webContents.on('will-navigate', function (event, url) {
-            console.log('will-navigate', event, url);
+            console.log('will-navigate', url);
             event.preventDefault();
         });
 
-        session.on('will-download', function (event) {
-            console.log('will-download', event);
+        session.on('will-download', function (event, item, webContents) {
+            console.log('will-download', item);
             event.preventDefault();
         });
 
