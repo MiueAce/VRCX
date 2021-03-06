@@ -2,7 +2,7 @@
 UIWindowTitleBar
 #app-content
     UILogin(v-show="isLoggedIn === false")
-    template(v-show="isLoggedIn === true")
+    div(v-show="isLoggedIn === true")
         div logged in yo
 </template>
 
