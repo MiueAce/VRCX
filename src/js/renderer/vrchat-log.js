@@ -88,6 +88,15 @@ function handleLog(name, data) {
             var { world, location } = context;
             dispatchEvent('vrchat-log:player-left', { time, user, world, location });
             break;
+
+        case 'video-url':
+            var url = data[2];
+            var { user, world, location } = context;
+            dispatchEvent('vrchat-log:video-url', { time, url, user, world, location });
+            break;
+
+        default:
+            break;
     }
 
     refCount_.value += 1;
