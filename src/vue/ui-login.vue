@@ -32,12 +32,12 @@ export default {
             isLoading.value = true;
 
             try {
-                await vrchatClient.getConfig();
+                await vrchatClient.getRemoteConfig();
                 var json = null;
                 if (username.value.length > 0 && password.value.length > 0) {
                     json = await vrchatClient.login(username.value, password.value);
                 } else {
-                    json = await vrchatClient.loadCurrentUser();
+                    json = await vrchatClient.getCurrentUser();
                 }
                 if ('requiresTwoFactorAuth' in json) {
                     var { value } = await ElMessageBox({
@@ -50,7 +50,7 @@ export default {
                     });
                     json = await vrchatClient.verifyTotpCode(value);
                     if ('verified' in json) {
-                        await vrchatClient.loadCurrentUser();
+                        await vrchatClient.getCurrentUser();
                     } else {
                         await vrchatClient.logout();
                     }
