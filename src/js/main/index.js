@@ -2,7 +2,7 @@ const { app } = require('electron');
 const native = require('vrcx-native');
 const { addEventListener } = require('../common/event-bus.js');
 const { createTrayMenu, destroyTrayMenu } = require('./tray-menu.js');
-const mainWindow = require('./main-window.js');
+const { createMainWindow, destroyMainWindow, sendToMainWindow, activateMainWindow } = require('./main-window.js');
 const vrchatLogWatcher = require('./vrchat-log-watcher.js');
 const db = require('./db.js');
 
@@ -26,18 +26,19 @@ const db = require('./db.js');
     app.on('ready', function () {
         db.create();
         createTrayMenu();
-        mainWindow.create();
+        createMainWindow();
     });
 
     app.on('second-instance', function () {
-        mainWindow.activate();
+        activateMainWindow();
     });
 
     app.on('activate', function () {
-        mainWindow.activate();
+        activateMainWindow();
     });
 
     app.on('will-quit', function () {
+        destroyMainWindow();
         destroyTrayMenu();
         setImmediate(function () {
             db.destroy();
@@ -45,11 +46,11 @@ const db = require('./db.js');
     });
 
     addEventListener('tray-menu:double-click', function () {
-        mainWindow.activate();
+        activateMainWindow();
     });
 
     addEventListener('tray-menu:open', function () {
-        mainWindow.activate();
+        activateMainWindow();
     });
 
     addEventListener('tray-menu:quit', function () {
@@ -64,18 +65,18 @@ const db = require('./db.js');
     });
 
     vrchatLogWatcher.on('reset', function () {
-        mainWindow.send('vrchat-log-watcher:reset');
+        sendToMainWindow('vrchat-log-watcher:reset');
     });
 
     vrchatLogWatcher.on('watch', function (file) {
-        mainWindow.send('vrchat-log-watcher:watch', file);
+        sendToMainWindow('vrchat-log-watcher:watch', file);
     });
 
     vrchatLogWatcher.on('unwatch', function (file) {
-        mainWindow.send('vrchat-log-watcher:unwatch', file);
+        sendToMainWindow('vrchat-log-watcher:unwatch', file);
     });
 
     vrchatLogWatcher.on('data', function (file, data) {
-        mainWindow.send('vrchat-log-watcher:data', file, data);
+        sendToMainWindow('vrchat-log-watcher:data', file, data);
     });
 })();

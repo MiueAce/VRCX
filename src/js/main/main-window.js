@@ -1,12 +1,11 @@
 const path = require('path');
-const { EventEmitter } = require('events');
 const { app, BrowserWindow, ipcMain, screen, shell } = require('electron');
 const native = require('vrcx-native');
 const { APP_ICON } = require('./constants.js');
 const interceptWebRequest = require('./intercept-web-request.js');
 
-/** @type {?MainWindow} */
-var mainWindow = null;
+/** @type {?BrowserWindow} */
+var mainWindow_ = null;
 
 function nothing() {
     var overlayWindow = new BrowserWindow({
@@ -32,206 +31,197 @@ function nothing() {
     overlayWindow.loadURL('https://youtube.com/');
 }
 
-class MainWindow extends EventEmitter {
-    constructor() {
-        super();
-
-        /** @type {?BrowserWindow} */
-        this.browserWindow = null;
+function createMainWindow() {
+    if (mainWindow_ !== null) {
+        return;
     }
 
-    create() {
-        if (this.browserWindow !== null) {
+    var mainWindow = new BrowserWindow({
+        width: 800,
+        height: 500,
+        minWidth: 400,
+        minHeight: 250,
+        fullscreenable: false,
+        title: 'VRCX',
+        icon: APP_ICON,
+        frame: false,
+        webPreferences: {
+            preload: path.join(app.getAppPath(), 'assets/preload.js'),
+            sandbox: true,
+            defaultEncoding: 'utf-8',
+            contextIsolation: false,
+            disableDialogs: true,
+            autoplayPolicy: 'no-user-gesture-required',
+            spellcheck: false,
+        },
+    });
+    mainWindow_ = mainWindow;
+
+    var { webContents } = mainWindow;
+    var { session } = webContents;
+
+    webContents.openDevTools();
+
+    // hide fingerprints :p
+    webContents.userAgent = webContents.userAgent.replace(/(vrcx|electron)\/.+? /gi, '');
+
+    // bypass CORS
+    interceptWebRequest(session.webRequest);
+
+    mainWindow.on('close', function (event) {
+        if (app.isForceQuit === true) {
             return;
         }
 
-        var browserWindow = new BrowserWindow({
-            width: 800,
-            height: 500,
-            minWidth: 400,
-            minHeight: 250,
-            fullscreenable: false,
-            title: 'VRCX',
-            icon: APP_ICON,
-            frame: false,
-            webPreferences: {
-                preload: path.join(app.getAppPath(), 'assets/preload.js'),
-                sandbox: true,
-                defaultEncoding: 'utf-8',
-                contextIsolation: false,
-                disableDialogs: true,
-                autoplayPolicy: 'no-user-gesture-required',
-                spellcheck: false,
-            },
-        });
+        event.preventDefault();
+        this.hide();
+    });
 
-        var { webContents } = browserWindow;
-        var { session } = webContents;
+    mainWindow.on('move', function () {
+        // var [x, y] = this.getPosition();
+        // var [width, height] = this.getSize();
+    });
 
-        webContents.openDevTools();
+    mainWindow.on('resize', function () {
+        // var [x, y] = this.getPosition();
+        // var [width, height] = this.getSize();
+    });
 
-        // hide fingerprints :p
-        webContents.userAgent = webContents.userAgent.replace(/(vrcx|electron)\/.+? /gi, '');
+    mainWindow.on('show', function () {
+        var { x: winX, y: winY } = this.getBounds();
 
-        // bypass CORS
-        interceptWebRequest(session.webRequest);
-
-        browserWindow.on('close', function (event) {
-            if (app.isForceQuit === true) {
+        for (var { bounds } of screen.getAllDisplays()) {
+            var { height, width, x, y } = bounds;
+            if (winX >= x && winX <= x + width && winY >= y && winY <= y + height) {
+                // okay, windows in a display
                 return;
             }
+        }
 
-            event.preventDefault();
-            this.hide();
-        });
+        this.center();
+    });
 
-        browserWindow.on('move', function () {
-            // var [x, y] = this.getPosition();
-            // var [width, height] = this.getSize();
-        });
+    webContents.on('did-finish-load', function (event) {
+        // reset zoom
+        this.setZoomFactor(1);
+        this.setZoomLevel(0);
+    });
 
-        browserWindow.on('resize', function () {
-            // var [x, y] = this.getPosition();
-            // var [width, height] = this.getSize();
-        });
+    webContents.on('will-navigate', function (event, url) {
+        console.log('will-navigate', url);
+        event.preventDefault();
+    });
 
-        browserWindow.on('show', function () {
-            var { x: winX, y: winY } = this.getBounds();
+    webContents.setWindowOpenHandler(function ({ url }) {
+        console.log('new-window', url);
 
-            for (var { bounds } of screen.getAllDisplays()) {
-                var { height, width, x, y } = bounds;
-                if (winX >= x && winX <= x + width && winY >= y && winY <= y + height) {
-                    // okay, windows in a display
-                    return;
-                }
-            }
+        shell.openExternal(url);
+        return false;
+    });
 
-            this.center();
-        });
+    session.on('will-download', function (event, item, webContents) {
+        console.log('will-download', item);
+        event.preventDefault();
+    });
 
-        webContents.on('did-finish-load', function (event) {
-            // reset zoom
-            this.setZoomFactor(1);
-            this.setZoomLevel(0);
-        });
+    // webContents.session.cookies.flushStore();
+    // webContents.session.cookies.set({
+    //     url: 'https://api.vrchat.cloud/',
+    //     name: 'auth',
+    //     value: ''
+    // });
 
-        webContents.on('new-window', function (event, url) {
-            console.log('new-window', url);
-            event.preventDefault();
+    mainWindow.loadFile('assets/index.html');
+}
 
-            shell.openExternal(url);
-        });
-
-        webContents.on('will-navigate', function (event, url) {
-            console.log('will-navigate', url);
-            event.preventDefault();
-        });
-
-        session.on('will-download', function (event, item, webContents) {
-            console.log('will-download', item);
-            event.preventDefault();
-        });
-
-        // webContents.session.cookies.flushStore();
-        // webContents.session.cookies.set({
-        //     url: 'https://api.vrchat.cloud/',
-        //     name: 'auth',
-        //     value: ''
-        // });
-
-        browserWindow.loadFile('assets/index.html');
-
-        this.browserWindow = browserWindow;
+function destroyMainWindow() {
+    var mainWindow = mainWindow_;
+    if (mainWindow === null) {
+        return;
     }
 
-    destroy() {
-        var { browserWindow } = this;
+    mainWindow_ = null;
 
-        if (browserWindow === null) {
-            return;
-        }
+    try {
+        mainWindow.destroy();
+    } catch (err) {
+        console.error(err);
+    }
+}
 
-        this.browserWindow = null;
-
-        browserWindow.destroy();
+function sendToMainWindow(channel, ...args) {
+    var mainWindow = mainWindow_;
+    if (mainWindow === null) {
+        return;
     }
 
-    send(channel, ...args) {
-        var { browserWindow } = this;
+    mainWindow.webContents.send(channel, ...args);
+}
 
-        if (browserWindow === null) {
-            return;
-        }
-
-        var { webContents } = browserWindow;
-        webContents.send.apply(webContents, arguments);
+function activateMainWindow() {
+    var mainWindow = mainWindow_;
+    if (mainWindow === null) {
+        return;
     }
 
-    activate() {
-        var { browserWindow } = this;
-
-        if (browserWindow === null) {
-            return;
-        }
-
-        if (browserWindow.isMinimized() === true) {
-            browserWindow.restore();
-        }
-
-        browserWindow.show();
-        browserWindow.focus();
+    if (mainWindow.isMinimized() === true) {
+        mainWindow.restore();
     }
 
-    close() {
-        var { browserWindow } = this;
+    mainWindow.show();
+    mainWindow.focus();
+}
 
-        if (browserWindow === null) {
-            return;
-        }
-
-        browserWindow.close();
+function closeMainWindow() {
+    var mainWindow = mainWindow_;
+    if (mainWindow === null) {
+        return;
     }
 
-    minimize() {
-        var { browserWindow } = this;
+    mainWindow.close();
+}
 
-        if (browserWindow === null) {
-            return;
-        }
-
-        browserWindow.minimize();
+function minimizeMainWindow() {
+    var mainWindow = mainWindow_;
+    if (mainWindow === null) {
+        return;
     }
 
-    maximize() {
-        var { browserWindow } = this;
+    mainWindow.minimize();
+}
 
-        if (browserWindow === null) {
-            return;
-        }
-
-        if (browserWindow.isMaximized() === true) {
-            browserWindow.restore();
-            return;
-        }
-
-        browserWindow.maximize();
+function maximizeMainWindow() {
+    var mainWindow = mainWindow_;
+    if (mainWindow === null) {
+        return;
     }
+
+    if (mainWindow.isMaximized() === true) {
+        mainWindow.restore();
+        return;
+    }
+
+    mainWindow.maximize();
 }
 
 ipcMain.on('main-window:close', function (event) {
     event.returnValue = null;
-    mainWindow.close();
+    closeMainWindow();
 });
 
 ipcMain.on('main-window:minimize', function (event) {
     event.returnValue = null;
-    mainWindow.minimize();
+    minimizeMainWindow();
 });
 
 ipcMain.on('main-window:maximize', function (event) {
     event.returnValue = null;
-    mainWindow.maximize();
+    maximizeMainWindow();
 });
 
-mainWindow = new MainWindow();
-module.exports = mainWindow;
+module.exports = {
+    createMainWindow,
+    destroyMainWindow,
+    sendToMainWindow,
+    activateMainWindow,
+};
