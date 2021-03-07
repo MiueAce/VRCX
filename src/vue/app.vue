@@ -1,9 +1,13 @@
 <template lang="pug">
 UIWindowTitleBar()
 #app-content
-    UILogin(v-show="vrchatClient.isLoggedIn.value === false")
-    div(v-show="vrchatClient.isLoggedIn.value === true")
-        div yo
+    UILogin(v-show="vrchatClient.refIsLoggedIn.value === false")
+    div(v-show="vrchatClient.refIsLoggedIn.value === true")
+        div displayName={{ vrchatClient.refCurrentUser.value?.displayName }}
+        div state={{ vrchatClient.refCurrentUser.value?.state }}
+        div status={{ vrchatClient.refCurrentUser.value?.status }}
+        div statusDescription={{ vrchatClient.refCurrentUser.value?.statusDescription }}
+        UIFriendsList
 </template>
 
 <script>
@@ -11,19 +15,21 @@ const { ref, onMounted, onUnmounted } = require('vue');
 const { ElNotification } = require('element-plus');
 const { addEventListener } = require('../js/common/event-bus.js');
 const vrchatClient = require('../js/renderer/vrchat-client.js');
-const { resetWatchVrchatLog } = require('../js/renderer/vrchat-log.js');
+const vrchatLog = require('../js/renderer/vrchat-log.js');
 
 import UIWindowTitleBar from './ui-window-title-bar.vue';
 import UILogin from './ui-login.vue';
+import UIFriendsList from './ui-friends-list.vue';
 
 export default {
     components: {
         UIWindowTitleBar,
         UILogin,
+        UIFriendsList,
     },
     setup() {
         onMounted(function () {
-            resetWatchVrchatLog();
+            vrchatLog.resetLogWatcher();
         });
 
         onUnmounted(function () {

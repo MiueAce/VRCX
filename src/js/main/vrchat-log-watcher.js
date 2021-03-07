@@ -204,7 +204,7 @@ function parseLog(name, line) {
     }
 }
 
-function getVrchatLogBaseName(filePath) {
+function getLogFileName(filePath) {
     var name = path.basename(filePath);
     if (/^output_log_.+\.txt$/i.test(name) === false) {
         return null;
@@ -213,8 +213,8 @@ function getVrchatLogBaseName(filePath) {
     return name;
 }
 
-function watchVrchatLog(filePath) {
-    var name = getVrchatLogBaseName(filePath);
+function watchLog(filePath) {
+    var name = getLogFileName(filePath);
     if (name === null) {
         return;
     }
@@ -242,8 +242,8 @@ function watchVrchatLog(filePath) {
     dispatchEvent('vrchat-log-watcher:watch', name);
 }
 
-function unwatchVrchatLog(filePath) {
-    var name = getVrchatLogBaseName(filePath);
+function unwatchLog(filePath) {
+    var name = getLogFileName(filePath);
     if (name === null) {
         return;
     }
@@ -264,7 +264,7 @@ function unwatchVrchatLog(filePath) {
     dispatchEvent('vrchat-log-watcher:unwatch', name);
 }
 
-function startWatchVrchatLog() {
+function startLogWatcher() {
     if (watcher_ !== null || pendingStop_ !== null) {
         return;
     }
@@ -287,21 +287,21 @@ function startWatchVrchatLog() {
     //     .on('unlink', (path) => console.log(`File ${path} has been removed`));
 
     watcher.on('add', function (filePath) {
-        watchVrchatLog(filePath);
+        watchLog(filePath);
     });
 
     watcher.on('change', function (filePath) {
-        watchVrchatLog(filePath);
+        watchLog(filePath);
     });
 
     watcher.on('unlink', function (filePath) {
-        unwatchVrchatLog(filePath);
+        unwatchLog(filePath);
     });
 
     dispatchEvent('vrchat-log-watcher:start');
 }
 
-async function stopWatchVrchatLog() {
+async function stopLogWatcher() {
     if (pendingStop_ !== null) {
         return pendingStop_;
     }
@@ -323,7 +323,7 @@ async function stopWatchVrchatLog() {
         }
 
         for (var name of tailMap_.keys()) {
-            unwatchVrchatLog(name);
+            unwatchLog(name);
         }
 
         pendingStop_ = null;
@@ -332,29 +332,29 @@ async function stopWatchVrchatLog() {
     });
 }
 
-async function resetWatchVrchatLog() {
-    await stopWatchVrchatLog();
+async function resetLogWatcher() {
+    await stopLogWatcher();
     dispatchEvent('vrchat-log-watcher:reset');
-    startWatchVrchatLog();
+    startLogWatcher();
 }
 
 ipcMain.on('vrchat-log-watcher:start', function (event) {
     event.returnValue = null;
-    startWatchVrchatLog();
+    startLogWatcher();
 });
 
 ipcMain.on('vrchat-log-watcher:stop', function (event) {
     event.returnValue = null;
-    stopWatchVrchatLog();
+    stopLogWatcher();
 });
 
 ipcMain.on('vrchat-log-watcher:reset', function (event) {
     event.returnValue = null;
-    resetWatchVrchatLog();
+    resetLogWatcher();
 });
 
 module.exports = {
-    startWatchVrchatLog,
-    stopWatchVrchatLog,
-    resetWatchVrchatLog,
+    startLogWatcher,
+    stopLogWatcher,
+    resetLogWatcher,
 };

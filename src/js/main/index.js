@@ -4,7 +4,7 @@ const { addEventListener } = require('../common/event-bus.js');
 const { openDb, closeDb } = require('./db.js');
 const { createTrayMenu, destroyTrayMenu } = require('./tray-menu.js');
 const { createMainWindow, destroyMainWindow, sendToMainWindow, activateMainWindow } = require('./main-window.js');
-const { startWatchVrchatLog, stopWatchVrchatLog } = require('./vrchat-log-watcher.js');
+const { startLogWatcher, stopLogWatcher } = require('./vrchat-log-watcher.js');
 
 (function () {
     app.setName('VRCX');
@@ -27,7 +27,7 @@ const { startWatchVrchatLog, stopWatchVrchatLog } = require('./vrchat-log-watche
         openDb();
         createTrayMenu();
         createMainWindow();
-        startWatchVrchatLog();
+        startLogWatcher();
     });
 
     app.on('second-instance', function () {
@@ -39,7 +39,7 @@ const { startWatchVrchatLog, stopWatchVrchatLog } = require('./vrchat-log-watche
     });
 
     app.on('will-quit', function () {
-        stopWatchVrchatLog();
+        stopLogWatcher();
         destroyMainWindow();
         destroyTrayMenu();
         setImmediate(function () {

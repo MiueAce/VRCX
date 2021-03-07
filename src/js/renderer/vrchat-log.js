@@ -5,9 +5,9 @@ const { dispatchEvent } = require('../common/event-bus.js');
 /** @type {Map<string, object>} */
 var map_ = new Map();
 
-var count_ = ref(0);
+var refCount_ = ref(0);
 
-function watchVrchatLog(name) {
+function watchLog(name) {
     var context = map_.get(name);
     if (context !== void 0) {
         return;
@@ -20,11 +20,11 @@ function watchVrchatLog(name) {
     });
 }
 
-function unwatchVrchatLog(name) {
+function unwatchLog(name) {
     map_.delete(name);
 }
 
-function handleVrchatLog(name, data) {
+function handleLog(name, data) {
     var context = map_.get(name);
     if (context === void 0) {
         return;
@@ -90,30 +90,30 @@ function handleVrchatLog(name, data) {
             break;
     }
 
-    count_.value += 1;
+    refCount_.value += 1;
 }
 
-function resetWatchVrchatLog() {
+function resetLogWatcher() {
     ipcRenderer.send('vrchat-log-watcher:reset');
 }
 
 ipcRenderer.on('vrchat-log-watcher:reset', function (event) {
-    count_.value = 0;
+    refCount_.value = 0;
 });
 
 ipcRenderer.on('vrchat-log-watcher:watch', function (event, name) {
-    watchVrchatLog(name);
+    watchLog(name);
 });
 
 ipcRenderer.on('vrchat-log-watcher:unwatch', function (event, name) {
-    unwatchVrchatLog(name);
+    unwatchLog(name);
 });
 
 ipcRenderer.on('vrchat-log-watcher:data', function (event, name, data) {
-    handleVrchatLog(name, data);
+    handleLog(name, data);
 });
 
 module.exports = {
-    vrchatLogCount: count_,
-    resetWatchVrchatLog,
+    refCount: refCount_,
+    resetLogWatcher,
 };

@@ -9,21 +9,21 @@
             el-radio-button(v-for="locale in $i18n.availableLocales" :key="locale" :label="locale")
                 | {{ $t(`locale.${locale}`) }}
     #app-debug(style="-webkit-app-region: no-drag;position:absolute;right:150px;top:0;color:#888;")
-        el-button(type="primary" size="mini" native-type="button" @click="onLogout" v-show="vrchatClient.isLoggedIn.value === true")
+        el-button(type="primary" size="mini" native-type="button" @click="onLogout" v-show="vrchatClient.refIsLoggedIn.value === true")
             | {{ $t('login.logout')}}
-        | logCount={{ vrchatLogCount }}
+        | logCount={{ vrchatLog.refCount.value }}
 </template>
 
 <script>
 const { ipcRenderer } = window;
 const vrchatClient = require('../js/renderer/vrchat-client.js');
-const { vrchatLogCount } = require('../js/renderer/vrchat-log.js');
+const vrchatLog = require('../js/renderer/vrchat-log.js');
 
 export default {
     setup() {
         return {
             vrchatClient,
-            vrchatLogCount,
+            vrchatLog,
             close() {
                 ipcRenderer.send('main-window:close');
             },

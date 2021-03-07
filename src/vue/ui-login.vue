@@ -33,12 +33,15 @@ export default {
 
             try {
                 await vrchatClient.getRemoteConfig();
+
                 var json = null;
+
                 if (username.value.length > 0 && password.value.length > 0) {
                     json = await vrchatClient.login(username.value, password.value);
                 } else {
                     json = await vrchatClient.getCurrentUser();
                 }
+
                 if ('requiresTwoFactorAuth' in json) {
                     var { value } = await ElMessageBox({
                         message: 'input 2fa code',
@@ -48,7 +51,9 @@ export default {
                         inputPattern: /\d{6}/,
                         inputErrorMessage: 'Invalid Code',
                     });
+
                     json = await vrchatClient.verifyTotpCode(value);
+
                     if ('verified' in json) {
                         await vrchatClient.getCurrentUser();
                     } else {
