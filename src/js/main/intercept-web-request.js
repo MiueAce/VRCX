@@ -1,5 +1,12 @@
 const { WebRequest } = require('electron');
 
+function changeSetCookies(setCookies) {
+    for (var i = setCookies.length - 1; i >= 0; --i) {
+        var cookie = setCookies[i].split(';')[0];
+        setCookies[i] = cookie + '; Path=/; Expires=Thu, 31 Dec 2037 23:55:55 GMT; HttpOnly; Secure; SameSite=None';
+    }
+}
+
 /** @param {WebRequest} webRequest */
 module.exports = function (webRequest) {
     webRequest.onBeforeSendHeaders(
@@ -31,12 +38,7 @@ module.exports = function (webRequest) {
             var { responseHeaders } = details;
 
             if ('set-cookie' in responseHeaders) {
-                var setCookies = responseHeaders['set-cookie'];
-                for (var i = setCookies.length - 1; i >= 0; --i) {
-                    var cookie = setCookies[i].split(';')[0];
-                    setCookies[i] =
-                        cookie + '; Path=/; Expires=Thu, 31 Dec 2037 23:55:55 GMT; HttpOnly; Secure; SameSite=None';
-                }
+                changeSetCookies(responseHeaders['set-cookie']);
             }
 
             responseHeaders['access-control-allow-origin'] = ['*'];
