@@ -11,7 +11,7 @@ const { ref, onMounted, onUnmounted } = require('vue');
 const { ElNotification } = require('element-plus');
 const { addEventListener } = require('../js/common/event-bus.js');
 const vrchatClient = require('../js/renderer/vrchat-client.js');
-const vrchatLogRepository = require('../js/renderer/vrchat-log-repository.js');
+const { resetWatchVrchatLog } = require('../js/renderer/vrchat-log.js');
 
 import UIWindowTitleBar from './ui-window-title-bar.vue';
 import UILogin from './ui-login.vue';
@@ -23,7 +23,7 @@ export default {
     },
     setup() {
         onMounted(function () {
-            vrchatLogRepository.reset();
+            resetWatchVrchatLog();
         });
 
         onUnmounted(function () {
@@ -61,9 +61,6 @@ export default {
 
         return {
             vrchatClient,
-            resetVRChatLog() {
-                vrchatLogRepository.reset();
-            },
         };
     },
 };
