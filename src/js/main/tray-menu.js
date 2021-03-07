@@ -10,38 +10,34 @@ function createTrayMenu() {
         return;
     }
 
-    try {
-        var tray = new Tray(APP_ICON);
-        tray_ = tray;
+    var tray = new Tray(APP_ICON);
+    tray_ = tray;
 
-        tray.setToolTip('VRCX');
+    tray.setToolTip('VRCX');
 
-        tray.on('double-click', function () {
-            dispatchEvent('tray-menu:double-click');
-        });
+    tray.on('double-click', function () {
+        dispatchEvent('tray-menu:double-click');
+    });
 
-        tray.setContextMenu(
-            Menu.buildFromTemplate([
-                {
-                    label: 'Open',
-                    click() {
-                        dispatchEvent('tray-menu:open');
-                    },
+    tray.setContextMenu(
+        Menu.buildFromTemplate([
+            {
+                label: 'Open',
+                click() {
+                    dispatchEvent('tray-menu:open');
                 },
-                {
-                    type: 'separator',
+            },
+            {
+                type: 'separator',
+            },
+            {
+                label: 'Quit VRCX',
+                click() {
+                    dispatchEvent('tray-menu:quit');
                 },
-                {
-                    label: 'Quit VRCX',
-                    click() {
-                        dispatchEvent('tray-menu:quit');
-                    },
-                },
-            ])
-        );
-    } catch (err) {
-        console.error(err);
-    }
+            },
+        ])
+    );
 }
 
 function destroyTrayMenu() {
