@@ -4,7 +4,7 @@ const { addEventListener } = require('../common/event-bus.js');
 const { openDb, closeDb } = require('./db.js');
 const { createTrayMenu, destroyTrayMenu } = require('./tray-menu.js');
 const { createMainWindow, destroyMainWindow, sendToMainWindow, activateMainWindow } = require('./main-window.js');
-const vrchatLogWatcher = require('./vrchat-log-watcher.js');
+const { startWatchVrchatLog, stopWatchVrchatLog } = require('./vrchat-log-watcher.js');
 
 (function () {
     app.setName('VRCX');
@@ -27,6 +27,7 @@ const vrchatLogWatcher = require('./vrchat-log-watcher.js');
         openDb();
         createTrayMenu();
         createMainWindow();
+        startWatchVrchatLog();
     });
 
     app.on('second-instance', function () {
@@ -38,6 +39,7 @@ const vrchatLogWatcher = require('./vrchat-log-watcher.js');
     });
 
     app.on('will-quit', function () {
+        stopWatchVrchatLog();
         destroyMainWindow();
         destroyTrayMenu();
         setImmediate(function () {
@@ -64,19 +66,19 @@ const vrchatLogWatcher = require('./vrchat-log-watcher.js');
         }, 5000);
     });
 
-    vrchatLogWatcher.on('reset', function () {
+    addEventListener('vrchat-log-watcher:data', function (name, data) {
+        sendToMainWindow('vrchat-log-watcher:data', name, data);
+    });
+
+    addEventListener('vrchat-log-watcher:reset', function () {
         sendToMainWindow('vrchat-log-watcher:reset');
     });
 
-    vrchatLogWatcher.on('watch', function (file) {
-        sendToMainWindow('vrchat-log-watcher:watch', file);
+    addEventListener('vrchat-log-watcher:watch', function (name) {
+        sendToMainWindow('vrchat-log-watcher:watch', name);
     });
 
-    vrchatLogWatcher.on('unwatch', function (file) {
-        sendToMainWindow('vrchat-log-watcher:unwatch', file);
-    });
-
-    vrchatLogWatcher.on('data', function (file, data) {
-        sendToMainWindow('vrchat-log-watcher:data', file, data);
+    addEventListener('vrchat-log-watcher:unwatch', function (name) {
+        sendToMainWindow('vrchat-log-watcher:unwatch', name);
     });
 })();

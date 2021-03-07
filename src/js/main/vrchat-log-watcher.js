@@ -1,23 +1,19 @@
-const { EventEmitter } = require('events');
 const path = require('path');
 const { app, ipcMain } = require('electron');
 const chokidar = require('chokidar');
 const { Tail } = require('tail');
+const { dispatchEvent } = require('../common/event-bus.js');
 
-/** @type {?VRChatLogWatcher} */
-var vrchatLogWatcher = null;
+/** @type {?Promise<void>} */
+var pendingStop_ = null;
 
-function getLogBaseName(filePath) {
-    var basename = path.basename(filePath);
+/** @type {?chokidar.FSWatcher} */
+var watcher_ = null;
 
-    if (/^output_log_.+\.txt$/i.test(basename) === false) {
-        return null;
-    }
+/** @type {Map<string, Tail.Tail>} */
+var tailMap_ = new Map();
 
-    return basename;
-}
-
-function parseLogAuth(file, line, offset) {
+function parseLogAuth(name, line, offset) {
     // 2021.03.01 00:02:24 Log        -  [Behaviour] Client invoked disconnect.
     // 2021.03.01 00:52:41 Log        -  [Behaviour] VRChat Build: VRChat 2021.1.3-1054-1c7ebce472-Release, Steam WindowsPlayer
 
@@ -27,7 +23,7 @@ function parseLogAuth(file, line, offset) {
         case 'C':
             if (line.startsWith('Client invoked disconnect', offset) === true) {
                 var time = line.substr(0, 19);
-                vrchatLogWatcher.emit('data', file, [time, 'disconnect']);
+                dispatchEvent('vrchat-log-watcher:data', name, [time, 'disconnect']);
                 return true;
             }
             break;
@@ -36,7 +32,7 @@ function parseLogAuth(file, line, offset) {
             if (line.startsWith('VRChat Build: ', offset) === true) {
                 var data = line.substr(offset);
                 var time = line.substr(0, 19);
-                vrchatLogWatcher.emit('data', file, [time, 'launch', data]);
+                dispatchEvent('vrchat-log-watcher:data', name, [time, 'launch', data]);
                 return true;
             }
             break;
@@ -48,7 +44,7 @@ function parseLogAuth(file, line, offset) {
     return false;
 }
 
-function parseLogLocation(file, line, offset) {
+function parseLogLocation(name, line, offset) {
     // 2020.10.31 23:36:28 Log        -  [VRCFlowManagerVRC] Destination fetching: wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd
     // 2020.10.31 23:36:28 Log        -  [VRCFlowManagerVRC] Destination set: wrld_4432ea9b-729c-46e3-8eaf-846aa0a37fdd
     // 2020.10.31 23:36:31 Log        -  [RoomManager] Entering Room: VRChat Home
@@ -69,7 +65,7 @@ function parseLogLocation(file, line, offset) {
             if (line.startsWith('Destination set: ', offset) === true) {
                 var location = line.substr(offset + 17);
                 var time = line.substr(0, 19);
-                vrchatLogWatcher.emit('data', file, [time, 'destination', location]);
+                dispatchEvent('vrchat-log-watcher:data', name, [time, 'destination', location]);
                 return true;
             }
             break;
@@ -78,7 +74,7 @@ function parseLogLocation(file, line, offset) {
             if (line.startsWith('Entering Room: ', offset) === true) {
                 var world = line.substr(offset + 15);
                 var time = line.substr(0, 19);
-                vrchatLogWatcher.emit('data', file, [time, 'entering-room', world]);
+                dispatchEvent('vrchat-log-watcher:data', name, [time, 'entering-room', world]);
                 return true;
             }
             break;
@@ -87,7 +83,7 @@ function parseLogLocation(file, line, offset) {
             if (line.startsWith('Joining wrld_', offset) === true) {
                 var location = line.substr(offset + 8);
                 var time = line.substr(0, 19);
-                vrchatLogWatcher.emit('data', file, [time, 'joining-room', location]);
+                dispatchEvent('vrchat-log-watcher:data', name, [time, 'joining-room', location]);
                 return true;
             }
             break;
@@ -95,7 +91,7 @@ function parseLogLocation(file, line, offset) {
         case 'O':
             if (line.startsWith('OnLeftRoom', offset) === true) {
                 var time = line.substr(0, 19);
-                vrchatLogWatcher.emit('data', file, [time, 'left-room']);
+                dispatchEvent('vrchat-log-watcher:data', name, [time, 'left-room']);
                 return true;
             }
             break;
@@ -107,7 +103,7 @@ function parseLogLocation(file, line, offset) {
     return false;
 }
 
-function parseLogPlayerJoinedOrLeft(file, line, offset) {
+function parseLogPlayerJoinedOrLeft(name, line, offset) {
     // 2020.10.31 23:36:58 Log        -  [NetworkManager] OnPlayerJoined pypy
     // 2020.10.31 23:36:58 Log        -  [Player] Initialized PlayerAPI "pypy" is local
     // 2020.10.31 23:36:58 Log        -  [NetworkManager] OnPlayerJoined Rize♡
@@ -126,13 +122,13 @@ function parseLogPlayerJoinedOrLeft(file, line, offset) {
         if (line.startsWith('OnPlayerJoined ', offset) === true) {
             var user = line.substr(offset + 15);
             var time = line.substr(0, 19);
-            vrchatLogWatcher.emit('data', file, [time, 'player-joined', user]);
+            dispatchEvent('vrchat-log-watcher:data', name, [time, 'player-joined', user]);
             return true;
         }
         if (line.startsWith('OnPlayerLeft ', offset) === true) {
             var user = line.substr(offset + 13);
             var time = line.substr(0, 19);
-            vrchatLogWatcher.emit('data', file, [time, 'player-left', user]);
+            dispatchEvent('vrchat-log-watcher:data', name, [time, 'player-left', user]);
             return true;
         }
     }
@@ -140,7 +136,7 @@ function parseLogPlayerJoinedOrLeft(file, line, offset) {
     return false;
 }
 
-function parseLogVideoPlayback(file, line, offset) {
+function parseLogVideoPlayback(name, line, offset) {
     // 2021.02.28 22:22:23 Log        -  [Video Playback] Attempting to resolve URL 'https://youtu.be/SHIL6F4fz_Y'
 
     var firstLetter = line[offset];
@@ -151,14 +147,14 @@ function parseLogVideoPlayback(file, line, offset) {
             url = url.substr(1, url.length - 2);
         }
         var time = line.substr(0, 19);
-        vrchatLogWatcher.emit('data', file, [time, 'video-url', url]);
+        dispatchEvent('vrchat-log-watcher:data', name, [time, 'video-url', url]);
         return true;
     }
 
     return false;
 }
 
-function parseLogNotification(file, line, offset) {
+function parseLogNotification(name, line, offset) {
     // 2021.01.03 05:48:58 Log        -  Received Notification: < Notification from username:pypy, sender user id:usr_4f76a584-9d4b-46f6-8209-8305eb683661 to of type: friendRequest, id: not_3a8f66eb-613c-4351-bee3-9980e6b5652c, created at: 01/14/2021 15:38:40 UTC, details: {{}}, type:friendRequest, m seen:False, message: ""> received at 01/02/2021 16:48:58 UTC
 
     var firstLetter = line[offset];
@@ -170,14 +166,14 @@ function parseLogNotification(file, line, offset) {
         }
         var json = line.substr(offset + 24, pos - (offset + 24));
         var time = line.substr(0, 19);
-        vrchatLogWatcher.emit('data', file, [time, 'notification', json]);
+        dispatchEvent('vrchat-log-watcher:data', name, [time, 'notification', json]);
         return true;
     }
 
     return false;
 }
 
-function parseLog(file, line) {
+function parseLog(name, line) {
     if (line.length <= 37 || line[20] !== 'L' || line[31] != '-') {
         return;
     }
@@ -199,167 +195,166 @@ function parseLog(file, line) {
     }
 
     if (
-        parseLogPlayerJoinedOrLeft(file, line, offset) === true ||
-        parseLogLocation(file, line, offset) === true ||
-        parseLogVideoPlayback(file, line, offset) === true ||
-        parseLogAuth(file, line, offset) === true
+        parseLogPlayerJoinedOrLeft(name, line, offset) === true ||
+        parseLogLocation(name, line, offset) === true ||
+        parseLogVideoPlayback(name, line, offset) === true ||
+        parseLogAuth(name, line, offset) === true
     ) {
         // yo
     }
 }
 
-class VRChatLogWatcher extends EventEmitter {
-    constructor() {
-        super();
-
-        /** @type {?Promise} */
-        this.pendingStop = null;
-
-        /** @type {?chokidar.FSWatcher} */
-        this.watcher = null;
-
-        this.tailMap = new Map();
+function getVrchatLogBaseName(filePath) {
+    var name = path.basename(filePath);
+    if (/^output_log_.+\.txt$/i.test(name) === false) {
+        return null;
     }
 
-    start() {
-        if (this.pendingStop !== null || this.watcher !== null) {
-            return;
-        }
-
-        var watcher = chokidar.watch(path.join(app.getPath('home'), 'AppData/LocalLow/VRChat/VRChat'), {
-            followSymlinks: false,
-            usePolling: true,
-            interval: 1000,
-            useFsEvents: false,
-            depth: 0,
-        });
-
-        // watcher
-        //     .on('error', (error) => console.error(`Watcher error: ${error}`))
-        //     .on('ready', () => console.log('Initial scan complete. Ready for changes'))
-        //     .on('add', (path) => console.log(`File ${path} has been added`))
-        //     .on('unlink', (path) => console.log(`File ${path} has been removed`));
-
-        watcher.on('add', function (filePath) {
-            setImmediate(function () {
-                vrchatLogWatcher.watchLog(filePath);
-            });
-        });
-
-        watcher.on('change', function (filePath) {
-            setImmediate(function () {
-                vrchatLogWatcher.watchLog(filePath);
-            });
-        });
-
-        watcher.on('unlink', function (filePath) {
-            vrchatLogWatcher.unwatchLog(filePath);
-        });
-
-        this.watcher = watcher;
-        this.emit('start');
-    }
-
-    stop() {
-        if (this.pendingStop !== null) {
-            return this.pendingStop;
-        }
-
-        if (this.watcher === null) {
-            return Promise.resolve();
-        }
-
-        var self = this;
-
-        return new Promise(async function (resolve) {
-            self.pendingStop = this;
-
-            try {
-                await self.watcher.close();
-            } catch (err) {
-                console.error(err);
-            }
-
-            self.watcher = null;
-
-            setImmediate(function () {
-                for (var filePath of self.tailMap.keys()) {
-                    self.unwatchLog(filePath);
-                }
-                resolve();
-                self.pendingStop = null;
-                self.emit('stop');
-            });
-        });
-    }
-
-    async reset() {
-        await vrchatLogWatcher.stop();
-        this.emit('reset');
-        vrchatLogWatcher.start();
-    }
-
-    watchLog(filePath) {
-        var file = getLogBaseName(filePath);
-        if (file === null) {
-            return;
-        }
-
-        var tail = this.tailMap.get(file);
-        if (typeof tail !== 'undefined') {
-            return;
-        }
-
-        tail = new Tail(filePath, {
-            fromBeginning: true,
-        });
-
-        tail.on('error', function (err) {
-            console.error(file, err);
-            vrchatLogWatcher.unwatchLog(filePath);
-        });
-
-        tail.on('line', function (line) {
-            parseLog(file, line);
-        });
-
-        this.tailMap.set(file, tail);
-        this.emit('watch', file);
-    }
-
-    unwatchLog(filePath) {
-        var file = getLogBaseName(filePath);
-        if (file === null) {
-            return;
-        }
-
-        var tail = this.tailMap.get(file);
-        if (typeof tail === 'undefined') {
-            return;
-        }
-
-        tail.unwatch();
-
-        this.tailMap.delete(file);
-        this.emit('unwatch', file);
-    }
+    return name;
 }
 
-vrchatLogWatcher = new VRChatLogWatcher();
+function watchVrchatLog(filePath) {
+    var name = getVrchatLogBaseName(filePath);
+    if (name === null) {
+        return;
+    }
+
+    var tail = tailMap_.get(name);
+    if (tail !== void 0) {
+        return;
+    }
+
+    tail = new Tail(filePath, {
+        fromBeginning: true,
+    });
+
+    tailMap_.set(name, tail);
+
+    tail.on('error', function (err) {
+        console.error(name, err);
+        vrchatLogWatcher.unwatchLog(filePath);
+    });
+
+    tail.on('line', function (line) {
+        parseLog(name, line);
+    });
+
+    dispatchEvent('vrchat-log-watcher:watch', name);
+}
+
+function unwatchVrchatLog(filePath) {
+    var name = getVrchatLogBaseName(filePath);
+    if (name === null) {
+        return;
+    }
+
+    var tail = tailMap_.get(name);
+    if (tail === void 0) {
+        return;
+    }
+
+    tailMap_.delete(name);
+
+    try {
+        tail.unwatch();
+    } catch (err) {
+        console.error(err);
+    }
+
+    dispatchEvent('vrchat-log-watcher:unwatch', name);
+}
+
+function startWatchVrchatLog() {
+    if (watcher_ !== null || pendingStop_ !== null) {
+        return;
+    }
+
+    var logPath = path.join(app.getPath('home'), 'AppData/LocalLow/VRChat/VRChat');
+
+    var watcher = chokidar.watch(logPath, {
+        followSymlinks: false,
+        usePolling: true,
+        interval: 1000,
+        useFsEvents: false,
+        depth: 0,
+    });
+    watcher_ = watcher;
+
+    // watcher
+    //     .on('error', (error) => console.error(`Watcher error: ${error}`))
+    //     .on('ready', () => console.log('Initial scan complete. Ready for changes'))
+    //     .on('add', (path) => console.log(`File ${path} has been added`))
+    //     .on('unlink', (path) => console.log(`File ${path} has been removed`));
+
+    watcher.on('add', function (filePath) {
+        watchVrchatLog(filePath);
+    });
+
+    watcher.on('change', function (filePath) {
+        watchVrchatLog(filePath);
+    });
+
+    watcher.on('unlink', function (filePath) {
+        unwatchVrchatLog(filePath);
+    });
+
+    dispatchEvent('vrchat-log-watcher:start');
+}
+
+async function stopWatchVrchatLog() {
+    if (pendingStop_ !== null) {
+        return pendingStop_;
+    }
+
+    if (watcher_ === null) {
+        return Promise.resolve();
+    }
+
+    return new Promise(async function (resolve) {
+        pendingStop_ = this;
+
+        var watcher = watcher_;
+        watcher_ = null;
+
+        try {
+            await watcher.close();
+        } catch (err) {
+            console.error(err);
+        }
+
+        for (var name of tailMap_.keys()) {
+            unwatchVrchatLog(name);
+        }
+
+        pendingStop_ = null;
+        resolve();
+        dispatchEvent('vrchat-log-watcher:stop');
+    });
+}
+
+async function resetWatchVrchatLog() {
+    await stopWatchVrchatLog();
+    dispatchEvent('vrchat-log-watcher:reset');
+    startWatchVrchatLog();
+}
 
 ipcMain.on('vrchat-log-watcher:start', function (event) {
     event.returnValue = null;
-    vrchatLogWatcher.start();
+    startWatchVrchatLog();
 });
 
 ipcMain.on('vrchat-log-watcher:stop', function (event) {
     event.returnValue = null;
-    vrchatLogWatcher.stop();
+    stopWatchVrchatLog();
 });
 
 ipcMain.on('vrchat-log-watcher:reset', function (event) {
     event.returnValue = null;
-    vrchatLogWatcher.reset();
+    resetWatchVrchatLog();
 });
 
-module.exports = vrchatLogWatcher;
+module.exports = {
+    startWatchVrchatLog,
+    stopWatchVrchatLog,
+    resetWatchVrchatLog,
+};
