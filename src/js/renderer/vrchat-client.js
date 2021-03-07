@@ -84,7 +84,7 @@ function applyCurrentUser(json) {
         currentUser[key] = json[key];
     }
 
-    console.log('apllyCurrentUser', currentUser);
+    console.log('applyCurrentUser', currentUser);
 
     updateFriends();
 }
