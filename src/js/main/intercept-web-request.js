@@ -33,7 +33,9 @@ module.exports = function (webRequest) {
             if ('set-cookie' in responseHeaders) {
                 var setCookies = responseHeaders['set-cookie'];
                 for (var i = setCookies.length - 1; i >= 0; --i) {
-                    setCookies[i] = setCookies[i].replace(/; SameSite=(Lax|Strict|None)/gi, '') + '; SameSite=None; Secure';
+                    var cookie = setCookies[i].split(';')[0];
+                    setCookies[i] =
+                        cookie + '; Path=/; Expires=Thu, 31 Dec 2037 23:55:55 GMT; HttpOnly; Secure; SameSite=None';
                 }
             }
 
