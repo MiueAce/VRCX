@@ -1,10 +1,10 @@
 const { app } = require('electron');
 const native = require('vrcx-native');
 const { addEventListener } = require('../common/event-bus.js');
+const { openDb, closeDb } = require('./db.js');
 const { createTrayMenu, destroyTrayMenu } = require('./tray-menu.js');
 const { createMainWindow, destroyMainWindow, sendToMainWindow, activateMainWindow } = require('./main-window.js');
 const vrchatLogWatcher = require('./vrchat-log-watcher.js');
-const db = require('./db.js');
 
 (function () {
     app.setName('VRCX');
@@ -24,7 +24,7 @@ const db = require('./db.js');
     app.isForceQuit = false;
 
     app.on('ready', function () {
-        db.create();
+        openDb();
         createTrayMenu();
         createMainWindow();
     });
@@ -41,7 +41,7 @@ const db = require('./db.js');
         destroyMainWindow();
         destroyTrayMenu();
         setImmediate(function () {
-            db.destroy();
+            closeDb();
         });
     });
 
@@ -59,7 +59,7 @@ const db = require('./db.js');
 
         // ensure exit
         setTimeout(function () {
-            db.destroy();
+            closeDb();
             app.exit();
         }, 5000);
     });

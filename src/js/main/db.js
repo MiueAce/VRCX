@@ -2,85 +2,87 @@ const path = require('path');
 const { app, ipcMain } = require('electron');
 const BetterSqlite3 = require('better-sqlite3');
 
-/** @type {?DB} */
-var db = null;
+/** @type {?BetterSqlite3.Database} */
+var sqlite3_ = null;
 
-class DB {
-    constructor() {
-        /** @type {?BetterSqlite3.Database} */
-        this.sqlite3 = null;
+function openDb() {
+    if (sqlite3_ !== null) {
+        return;
     }
 
-    create() {
-        if (this.sqlite3 !== null) {
-            return;
-        }
+    var dbPath = path.join(app.getPath('userData'), 'VRCX.sqlite3');
 
-        var dbPath = path.join(app.getPath('userData'), 'VRCX.sqlite3');
+    var sqlite3 = BetterSqlite3(dbPath, {
+        verbose: console.log,
+    });
+    sqlite3_ = sqlite3;
 
-        var sqlite3 = BetterSqlite3(dbPath, {
-            verbose: console.log,
-        });
+    execDb('PRAGMA journal_mode=WAL');
+    execDb('PRAGMA locking_mode=EXCLUSIVE');
+    execDb('PRAGMA synchronous=FULL'); // better-sqlite3 is NORMAL
+    execDb('PRAGMA wal_checkpoint(TRUNCATE)');
+}
 
-        sqlite3.exec('PRAGMA journal_mode=WAL');
-        sqlite3.exec('PRAGMA locking_mode=EXCLUSIVE');
-        sqlite3.exec('PRAGMA synchronous=FULL'); // better-sqlite3 is NORMAL
-        sqlite3.exec('PRAGMA wal_checkpoint(TRUNCATE)');
-
-        this.sqlite3 = sqlite3;
+function closeDb() {
+    var sqlite3 = sqlite3_;
+    if (sqlite3 === null) {
+        return;
     }
 
-    destroy() {
-        var { sqlite3 } = this;
+    sqlite3_ = null;
 
-        if (sqlite3 === null) {
-            return;
-        }
-
-        this.sqlite3 = null;
-
+    try {
         sqlite3.close();
-    }
-
-    transaction(callback) {
-        var { sqlite3 } = this;
-
-        if (sqlite3 === null) {
-            return null;
-        }
-
-        return sqlite3.transaction(callback);
-    }
-
-    prepare(query) {
-        var { sqlite3 } = this;
-
-        if (sqlite3 === null) {
-            return null;
-        }
-
-        return sqlite3.prepare(query);
-    }
-
-    exec(query) {
-        var { sqlite3 } = this;
-
-        if (sqlite3 === null) {
-            return null;
-        }
-
-        return sqlite3.exec(query);
+    } catch (err) {
+        console.error(err);
     }
 }
 
-ipcMain.handle('db:query', function (event, query, params) {
+function execDb(query) {
+    var sqlite3 = sqlite3_;
+    if (sqlite3 === null) {
+        return false;
+    }
+
     try {
-        var stmt = db.prepare(query);
+        sqlite3.exec(query);
+        return true;
+    } catch (err) {
+        console.error(err);
+    }
 
-        if (Array.isArray(params) === true) {
-            return stmt.all.apply(stmt, params);
+    return false;
+}
+
+function prepareDb(query) {
+    var sqlite3 = sqlite3_;
+    if (sqlite3 === null) {
+        return null;
+    }
+
+    try {
+        return sqlite3.prepare(query);
+    } catch (err) {
+        console.error(err);
+    }
+
+    return null;
+}
+
+ipcMain.handle('db:exec', function (event, query) {
+    return execDb(query);
+});
+
+ipcMain.handle('db:query', function (event, query, ...params) {
+    var stmt = prepareDb(query);
+    if (stmt === null) {
+        return null;
+    }
+
+    try {
+        if (params.length > 0) {
+            return stmt.all(stmt, ...params);
         }
-
         return stmt.all();
     } catch (err) {
         console.error(err);
@@ -89,15 +91,9 @@ ipcMain.handle('db:query', function (event, query, params) {
     return null;
 });
 
-ipcMain.handle('db:exec', function (event, query) {
-    try {
-        return db.exec(query);
-    } catch (err) {
-        console.error(err);
-    }
-
-    return null;
-});
-
-db = new DB();
-module.exports = db;
+module.exports = {
+    openDb,
+    closeDb,
+    execDb,
+    prepareDb,
+};
