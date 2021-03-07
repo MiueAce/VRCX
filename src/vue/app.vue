@@ -21,6 +21,13 @@ import UIWindowTitleBar from './ui-window-title-bar.vue';
 import UILogin from './ui-login.vue';
 import UIFriendsList from './ui-friends-list.vue';
 
+addEventListener('vrchat-api:error', function ({ status, message }) {
+    ElNotification({
+        type: 'error',
+        message: `code ${status}, ${message}`,
+    });
+});
+
 export default {
     components: {
         UIWindowTitleBar,
@@ -34,13 +41,6 @@ export default {
 
         onUnmounted(function () {
             vrchatClient.dispose();
-        });
-
-        addEventListener('vrchat-api:error', function ({ status, message }) {
-            ElNotification({
-                type: 'error',
-                message: `code ${status}, ${message}`,
-            });
         });
 
         // addEventListener('vrchat-log:launch', function () {
