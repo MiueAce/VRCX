@@ -1,4 +1,5 @@
-const { ref } = require('vue');
+const { ref, watch } = require('vue');
+const { dispatchEvent } = require('../common/event-bus.js');
 const api = require('./vrchat-api.js');
 
 /** @type {?WebSocket} */
@@ -13,6 +14,23 @@ var refUsers_ = ref({});
 var isCheckingWebSocket_ = false;
 var isPollingCurrentUser_ = false;
 var currentUserPollTime_ = 0;
+
+function onLogin() {
+    console.log('onLogin');
+
+    dispatchEvent('vrchat-client:login');
+}
+
+function onLogout() {
+    console.log('onLogout');
+
+    refCurrentUser_.value = {};
+    refFriends_.value = [];
+
+    closeWebSocket();
+
+    dispatchEvent('vrchat-client:logout');
+}
 
 function updateFriends() {
     var prevFriends = new Set(refFriends_.value);
@@ -48,14 +66,12 @@ function applyCurrentUser(json) {
     if ('error' in json) {
         if (json.error.status_code === 401) {
             refIsLoggedIn_.value = false;
-            refCurrentUser_.value = null;
         }
         return json;
     }
 
     if ('requiresTwoFactorAuth' in json) {
         refIsLoggedIn_.value = false;
-        refCurrentUser_.value = null;
         return json;
     }
 
@@ -102,7 +118,6 @@ async function logout() {
     // {"success":{"message":"Ok!","status_code":200}}
 
     refIsLoggedIn_.value = false;
-    closeWebSocket();
 
     return json;
 }
@@ -352,6 +367,17 @@ setInterval(function poll() {
         console.error(err);
     }
 }, 1000);
+
+watch(refIsLoggedIn_, function (isLoggedIn, prevIsLoggedIn) {
+    if (isLoggedIn === prevIsLoggedIn) {
+        return;
+    }
+    if (isLoggedIn === true) {
+        onLogin();
+    } else if (isLoggedIn === false) {
+        onLogout();
+    }
+});
 
 module.exports = {
     refIsLoggedIn: refIsLoggedIn_,

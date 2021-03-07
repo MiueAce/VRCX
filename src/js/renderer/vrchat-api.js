@@ -20,6 +20,7 @@ function setApiKey(apiKey) {
 
 async function callApi(options) {
     var { status, data } = await axios_(options);
+
     console.log('callApi', { options, status, data });
 
     // {"error":{"message":"\"Missing Credentials\"","status_code":401}}
