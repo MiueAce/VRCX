@@ -199,22 +199,32 @@ function handleWebSocketFriendDelete(json) {
 
 function handleWebSocketFriendOnline(json) {
     console.log('handleWebSocketFriendOnline', json);
+
+    var { userId, user, location, instance, world, canRequestInvite } = json;
 }
 
 function handleWebSocketFriendActive(json) {
     console.log('handleWebSocketFriendActive', json);
+
+    var { userId, user } = json;
 }
 
 function handleWebSocketFriendOffline(json) {
     console.log('handleWebSocketFriendOffline', json);
+
+    var { userId } = json;
 }
 
 function handleWebSocketFriendUpdate(json) {
     console.log('handleWebSocketFriendUpdate', json);
+
+    var { userId, user } = json;
 }
 
 function handleWebSocketFriendLocation(json) {
     console.log('handleWebSocketFriendLocation', json);
+
+    var { userId, user, location, instance, world, canRequestInvite } = json;
 }
 
 function handleWebSocketUserUpdate(json) {
@@ -231,6 +241,8 @@ function handleWebSocketUserUpdate(json) {
 
 function handleWebSocketUserLocation(json) {
     console.log('handleWebSocketUserLocation', json);
+
+    var { userId, location, instance, world } = json;
 }
 
 function onWebSocketMesage(event) {
