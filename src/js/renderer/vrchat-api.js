@@ -324,7 +324,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -335,7 +334,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 userId,
@@ -355,7 +353,7 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 userId,
             },
         });
@@ -367,7 +365,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 releaseStatus: 'private',
@@ -381,7 +378,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 releaseStatus: 'public',
@@ -395,7 +391,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -406,7 +401,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 avatarId,
@@ -422,7 +416,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 bio,
@@ -436,7 +429,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 bioLinks,
@@ -452,7 +444,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -463,7 +454,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -474,7 +464,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 condensed: true,
             },
         });
@@ -486,7 +476,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 username,
                 displayName,
                 excludeUserId,
@@ -500,7 +490,7 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 displayName,
                 currentPassword,
             },
@@ -513,7 +503,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 email,
                 excludeUserId,
             },
@@ -526,7 +516,7 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 email,
                 currentPassword,
             },
@@ -539,7 +529,7 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 password,
                 currentPassword,
             },
@@ -552,7 +542,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -563,7 +552,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -574,7 +562,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -585,7 +572,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -597,7 +583,6 @@ class VRChatApi {
             data,
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -613,7 +598,6 @@ class VRChatApi {
             },
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data,
         });
@@ -627,7 +611,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -638,7 +621,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 offline: !online,
                 n,
                 offset,
@@ -654,7 +637,6 @@ class VRChatApi {
             method: 'post',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 tags,
@@ -668,7 +650,6 @@ class VRChatApi {
             method: 'post',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 tags,
@@ -684,7 +665,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -701,7 +681,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             auth: {
                 username,
@@ -717,7 +696,6 @@ class VRChatApi {
             method: 'post',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 code,
@@ -731,7 +709,6 @@ class VRChatApi {
             method: 'post',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 code,
@@ -747,7 +724,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -758,7 +734,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -769,7 +744,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -780,7 +754,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -791,7 +764,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 sent: false,
                 type: 'friendRequest',
                 n: 100,
@@ -805,7 +778,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 sent: false,
                 n: 100,
                 after: 'five_minutes_ago',
@@ -821,7 +794,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -832,7 +804,7 @@ class VRChatApi {
             method: 'post',
             data: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 moderated,
                 type: 'block',
             },
@@ -845,7 +817,7 @@ class VRChatApi {
             method: 'put',
             data: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 moderated,
                 type: 'block',
             },
@@ -858,7 +830,7 @@ class VRChatApi {
             method: 'post',
             data: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 moderated,
                 type: 'mute',
             },
@@ -871,7 +843,7 @@ class VRChatApi {
             method: 'put',
             data: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 moderated,
                 type: 'mute',
             },
@@ -884,7 +856,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -897,7 +868,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 email,
@@ -911,7 +881,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 emailToken,
@@ -929,7 +898,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 sort: 'relevance',
                 fuzzy: true,
                 search,
@@ -944,7 +913,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 sort: 'relevance',
                 fuzzy: true,
                 search,
@@ -960,7 +929,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 sort: 'relevance',
                 fuzzy: true,
                 search,
@@ -975,7 +944,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 sort: 'relevance',
                 fuzzy: true,
                 search,
@@ -993,7 +962,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1004,7 +972,6 @@ class VRChatApi {
             method: 'post',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1015,7 +982,6 @@ class VRChatApi {
             method: 'post',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 code,
@@ -1029,7 +995,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1040,7 +1005,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1053,7 +1017,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1064,7 +1027,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1075,7 +1037,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1086,7 +1047,6 @@ class VRChatApi {
             method: 'post',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1097,7 +1057,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1108,7 +1067,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1119,7 +1077,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1131,7 +1088,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1141,7 +1097,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 avatarId: 'avtr_c38a1615-5bf5-42b4-84eb-a8b6c37cbd11',
@@ -1155,7 +1110,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 type: 'message',
@@ -1170,7 +1124,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1181,7 +1134,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1192,7 +1144,6 @@ class VRChatApi {
             method: 'post',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 tags,
@@ -1206,7 +1157,6 @@ class VRChatApi {
             method: 'post',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 tags,
@@ -1220,7 +1170,7 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 tag: 'icon',
                 n,
                 offset,
@@ -1235,7 +1185,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 tag: 'icon',
@@ -1254,7 +1203,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1265,7 +1213,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1276,7 +1223,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1287,7 +1233,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 userId,
@@ -1307,7 +1252,7 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
+
                 userId,
             },
         });
@@ -1319,7 +1264,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 name,
@@ -1338,7 +1282,6 @@ class VRChatApi {
             method: 'get',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1349,7 +1292,6 @@ class VRChatApi {
             method: 'put',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1360,7 +1302,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1371,7 +1312,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1382,7 +1322,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 tags,
@@ -1396,7 +1335,6 @@ class VRChatApi {
             method: 'delete',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
             data: {
                 tags,
@@ -1412,7 +1350,6 @@ class VRChatApi {
             method: 'post',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
@@ -1424,7 +1361,6 @@ class VRChatApi {
             url: 'auth',
             params: {
                 apiKey: this.apiKey,
-                organization: 'vrchat',
             },
         });
     }
