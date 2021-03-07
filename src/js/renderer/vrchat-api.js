@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { eventBus } = require('./event-bus.js');
+const { dispatchEvent } = require('../common/event-bus.js');
 
 /** @type {?VRChatApi} */
 var vrchatApi = null;
@@ -302,7 +302,7 @@ class VRChatApi {
                     message = 'An unknown error occurred';
                 }
             }
-            eventBus.emit('vrchat-api:error', { status, message });
+            dispatchEvent('vrchat-api:error', { status, message });
         }
 
         return data;
