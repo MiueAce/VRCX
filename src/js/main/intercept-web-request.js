@@ -23,8 +23,14 @@ function onWebRequestHeadersReceived(details, callback) {
     if ('set-cookie' in responseHeaders) {
         var headers = responseHeaders['set-cookie'];
         for (var i = headers.length - 1; i >= 0; --i) {
+            var extra = null;
             var cookie = headers[i].split(';')[0];
-            headers[i] = cookie + '; Path=/; Expires=Thu, 31 Dec 2037 23:55:55 GMT; HttpOnly; Secure; SameSite=None';
+            if (cookie.endsWith('=') === false) {
+                extra = '; Path=/; Expires=Thu, 31 Dec 2037 23:55:55 GMT; HttpOnly; Secure; SameSite=None';
+            } else {
+                extra = '; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; Secure; SameSite=None';
+            }
+            headers[i] = cookie + extra;
         }
     }
 
