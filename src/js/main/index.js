@@ -1,6 +1,7 @@
 const { app } = require('electron');
 const native = require('vrcx-native');
-const trayMenu = require('./tray-menu.js');
+const { addEventListener } = require('../common/event-bus.js');
+const { createTrayMenu, destroyTrayMenu } = require('./tray-menu.js');
 const mainWindow = require('./main-window.js');
 const vrchatLogWatcher = require('./vrchat-log-watcher.js');
 const db = require('./db.js');
@@ -24,7 +25,7 @@ const db = require('./db.js');
 
     app.on('ready', function () {
         db.create();
-        trayMenu.create();
+        createTrayMenu();
         mainWindow.create();
     });
 
@@ -37,21 +38,21 @@ const db = require('./db.js');
     });
 
     app.on('will-quit', function () {
-        trayMenu.destroy();
+        destroyTrayMenu();
         setImmediate(function () {
             db.destroy();
         });
     });
 
-    trayMenu.on('double-click', function () {
+    addEventListener('tray-menu:double-click', function () {
         mainWindow.activate();
     });
 
-    trayMenu.on('menu:open', function () {
+    addEventListener('tray-menu:open', function () {
         mainWindow.activate();
     });
 
-    trayMenu.on('menu:quit', function () {
+    addEventListener('tray-menu:quit', function () {
         app.isForceQuit = true;
         app.quit();
 

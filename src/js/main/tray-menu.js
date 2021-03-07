@@ -1,37 +1,31 @@
-const { EventEmitter } = require('events');
-const { Menu, Tray } = require('electron');
+const { Tray, Menu } = require('electron');
 const { APP_ICON } = require('./constants');
+const { dispatchEvent } = require('../common/event-bus.js');
 
-/** @type {?TrayMenu} */
-var trayMenu = null;
+/** @type {?Tray} */
+var tray_ = null;
 
-class TrayMenu extends EventEmitter {
-    constructor() {
-        super();
-
-        /** @type {?Tray} */
-        this.tray = null;
+function createTrayMenu() {
+    if (tray_ !== null) {
+        return;
     }
 
-    create() {
-        if (this.tray !== null) {
-            return;
-        }
-
+    try {
         var tray = new Tray(APP_ICON);
+        tray_ = tray;
 
         tray.setToolTip('VRCX');
 
         tray.on('double-click', function () {
-            trayMenu.emit('double-click');
+            dispatchEvent('tray-menu:double-click');
         });
 
         tray.setContextMenu(
             Menu.buildFromTemplate([
                 {
                     label: 'Open',
-                    click: function () {
-                        trayMenu.emit('menu:open');
+                    click() {
+                        dispatchEvent('tray-menu:open');
                     },
                 },
                 {
@@ -39,28 +33,33 @@ class TrayMenu extends EventEmitter {
                 },
                 {
                     label: 'Quit VRCX',
-                    click: function () {
-                        trayMenu.emit('menu:quit');
+                    click() {
+                        dispatchEvent('tray-menu:quit');
                     },
                 },
             ])
         );
-
-        this.tray = tray;
-    }
-
-    destroy() {
-        var { tray } = this;
-
-        if (tray === null) {
-            return;
-        }
-
-        this.tray = null;
-
-        tray.destroy();
+    } catch (err) {
+        console.error(err);
     }
 }
 
-trayMenu = new TrayMenu();
-module.exports = trayMenu;
+function destroyTrayMenu() {
+    if (tray_ === null) {
+        return;
+    }
+
+    var tray = tray_;
+    tray_ = null;
+
+    try {
+        tray.destroy();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+module.exports = {
+    createTrayMenu,
+    destroyTrayMenu,
+};
