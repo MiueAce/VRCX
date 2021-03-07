@@ -15,6 +15,7 @@
 
 <script>
 const { ref, onMounted, onUnmounted } = require('vue');
+const { ElMessageBox } = require('element-plus');
 const vrchatClient = require('../js/renderer/vrchat-client.js');
 
 export default {
@@ -39,6 +40,20 @@ export default {
                     json = await vrchatClient.loadCurrentUser();
                 }
                 if ('requiresTwoFactorAuth' in json) {
+                    var { value } = await ElMessageBox({
+                        message: 'input 2fa code',
+                        confirmButtonText: 'OK',
+                        cancelButtonText: 'Cancel',
+                        showInput: true,
+                        inputPattern: /\d{6}/,
+                        inputErrorMessage: 'Invalid Code',
+                    });
+                    json = await vrchatClient.verifyTotpCode(value);
+                    if ('verified' in json) {
+                        await vrchatClient.loadCurrentUser();
+                    } else {
+                        await vrchatClient.logout();
+                    }
                 }
             } catch (err) {
                 console.error(err);

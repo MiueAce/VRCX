@@ -277,6 +277,7 @@ class VRChatApi {
                     message = error;
                 } else if ('message' in error) {
                     status = parseInt(error.status_code, 10);
+                    message = error.message;
                     try {
                         var json = JSON.parse(error.message);
                         if (json === Object(json)) {

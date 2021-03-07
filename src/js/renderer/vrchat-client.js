@@ -123,14 +123,10 @@ class VRChatClient {
         return json;
     }
 
-    /**
-     * @param {string} type 'otp'|'totp'
-     * @param {object} data { code: string }
-     */
-    async verifyTwoFactorAuth(type, data) {
-        var json = await vrchatApi.verifyTwoFactorAuth(type, data);
+    async verifyTotpCode(code) {
+        var json = await vrchatApi.verifyTotpCode(code);
 
-        // {"verified": true}
+        // {"verified":true}
 
         return json;
     }
